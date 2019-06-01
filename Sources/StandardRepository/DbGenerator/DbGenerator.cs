@@ -54,9 +54,7 @@ namespace StandardRepository.DbGenerator
             FillProceduresDictionary();
             await RunProcedureGenerationQueries();
         }
-
-        public abstract void LoadPermissionData(List<Type> requests);
-
+        
         public abstract List<string> GenerateSchemas();
         public abstract List<string> GenerateTables();
 

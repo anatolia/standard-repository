@@ -195,7 +195,7 @@ namespace StandardRepository
 
         public abstract Task<List<long>> SelectIds(Expression<Func<T, bool>> where, bool isIncludeDeleted = false);
 
-        public abstract Task<List<T>> SelectAll(Expression<Func<T, bool>> where, Expression<Func<T, object>> orderColumn = null,
+        public abstract Task<List<T>> SelectAll(Expression<Func<T, bool>> where, Expression<Func<T, object>> orderByColumn = null,
                                                 bool isAscending = true, bool isIncludeDeleted = false);
 
         public async Task<List<EntityRevision<T>>> SelectRevisions(long id)

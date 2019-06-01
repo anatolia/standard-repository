@@ -59,7 +59,7 @@ namespace StandardRepository
         Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, long lastId, int take = 100, Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false);
         Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, Guid lastUid, int take = 100, Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false);
         Task<List<long>> SelectIds(Expression<Func<T, bool>> where, bool isIncludeDeleted = false);
-        Task<List<T>> SelectAll(Expression<Func<T, bool>> where, Expression<Func<T, object>> orderColumn = null, bool isAscending = true, bool isIncludeDeleted = false);
+        Task<List<T>> SelectAll(Expression<Func<T, bool>> where, Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false);
 
         Task<List<EntityRevision<T>>> SelectRevisions(long id);
         Task<bool> RestoreRevision(long currentUserId, long id, int revision);
