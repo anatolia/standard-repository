@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardRepository", "Sourc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardRepository.Tests", "Tests\StandardRepository.Tests\StandardRepository.Tests.csproj", "{016E8EC7-F5CE-4EAC-B086-B5C099C6BA85}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardRepository.PostgreSQL", "Sources\StandardRepository.PostgreSQL\StandardRepository.PostgreSQL.csproj", "{D768CDA4-B46A-48C9-A61A-94D71CDA8C72}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +27,10 @@ Global
 		{016E8EC7-F5CE-4EAC-B086-B5C099C6BA85}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{016E8EC7-F5CE-4EAC-B086-B5C099C6BA85}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{016E8EC7-F5CE-4EAC-B086-B5C099C6BA85}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D768CDA4-B46A-48C9-A61A-94D71CDA8C72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D768CDA4-B46A-48C9-A61A-94D71CDA8C72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D768CDA4-B46A-48C9-A61A-94D71CDA8C72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D768CDA4-B46A-48C9-A61A-94D71CDA8C72}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -32,6 +38,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{B33ED6B6-97FB-4047-88FB-001A166686AA} = {9BE2689D-04D0-4F63-B137-06BF66DDA6A7}
 		{016E8EC7-F5CE-4EAC-B086-B5C099C6BA85} = {F0225805-348C-49A5-9C72-CA0F3DCBBA74}
+		{D768CDA4-B46A-48C9-A61A-94D71CDA8C72} = {9BE2689D-04D0-4F63-B137-06BF66DDA6A7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4EDAADEA-9A55-4D96-B353-0B960F3A6AA4}
