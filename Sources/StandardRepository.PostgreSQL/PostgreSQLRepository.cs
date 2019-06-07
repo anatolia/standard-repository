@@ -18,6 +18,31 @@ namespace StandardRepository.PostgreSQL
 {
     public class PostgreSQLRepository<T> : StandardRepository<T, NpgsqlConnection, NpgsqlCommand, NpgsqlParameter> where T : BaseEntity, new()
     {
+        public PostgreSQLRepository(PostgreSQLTypeLookup typeLookup, PostgreSQLConstants<T> sqlConstants, EntityUtils entityUtils,
+                                    ExpressionUtils expressionUtils, PostgreSQLExecutor sqlExecutor, List<string> updateableFields) : base(typeLookup, sqlConstants, entityUtils,
+                                                                                                                                           expressionUtils, sqlExecutor, updateableFields)
+        {
+            var sb = new StringBuilder();
+            foreach (var field in Fields)
+            {
+                sb.Append($"{PostgreSQLConstants.PARAMETER_PRESIGN}{SQLConstants.PARAMETER_PREFIX}{field.Name.GetDelimitedName()},");
+            }
+            var lastComma = sb.ToString().LastIndexOf(',');
+            sb.Remove(lastComma, 1);
+
+            QueryInsert = $"{SQLConstants.SELECT} * {SQLConstants.FROM} {_sqlConstants.ProcedureNameInsert} (:{SQLConstants.UPDATED_BY_PARAMETER_NAME},:{SQLConstants.UID_PARAMETER_NAME},:{SQLConstants.NAME_PARAMETER_NAME},{sb});";
+            QueryUpdate = $"{PostgreSQLConstants.CALL} {_sqlConstants.ProcedureNameUpdate} (:{SQLConstants.UPDATED_BY_PARAMETER_NAME},:{_sqlConstants.IdParameterName},:{SQLConstants.NAME_PARAMETER_NAME},{sb});";
+
+            QueryDelete = $"{PostgreSQLConstants.CALL} {_sqlConstants.ProcedureNameDelete} (:{SQLConstants.UPDATED_BY_PARAMETER_NAME},:{_sqlConstants.IdParameterName});";
+            QueryUndoDelete = $"{PostgreSQLConstants.CALL} {_sqlConstants.ProcedureNameUndoDelete} (:{SQLConstants.UPDATED_BY_PARAMETER_NAME},:{_sqlConstants.IdParameterName});";
+            QueryHardDelete = $"{PostgreSQLConstants.CALL} {_sqlConstants.ProcedureNameHardDelete} (:{SQLConstants.UPDATED_BY_PARAMETER_NAME},:{_sqlConstants.IdParameterName});";
+
+            QuerySelectById = $"{SQLConstants.SELECT} * {SQLConstants.FROM} {_sqlConstants.ProcedureNameSelectById} (:{_sqlConstants.IdParameterName});";
+
+            QuerySelectRevisions = $"{SQLConstants.SELECT} * {SQLConstants.FROM} {_sqlConstants.ProcedureNameSelectRevisions} (:{_sqlConstants.IdParameterName});";
+            QueryRestoreRevision = $"{PostgreSQLConstants.CALL} {_sqlConstants.ProcedureNameRestoreRevision} (:{SQLConstants.UPDATED_BY_PARAMETER_NAME},:{_sqlConstants.IdParameterName},:{SQLConstants.REVISION_PARAMETER_NAME}, null);";
+        }
+
         public override void SetSqlExecutorForTransaction(IConnectionFactory<NpgsqlConnection> connectionFactory)
         {
             SQLExecutor = new PostgreSQLExecutor(connectionFactory, _entityUtils);

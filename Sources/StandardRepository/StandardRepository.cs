@@ -40,7 +40,22 @@ namespace StandardRepository
         protected readonly EntityUtils _entityUtils;
         protected readonly SQLConstants _sqlConstants;
         protected readonly ExpressionUtils _expressionUtils;
-        
+
+        protected StandardRepository(TypeLookup typeLookup, SQLConstants sqlConstants, EntityUtils entityUtils, ExpressionUtils expressionUtils,
+                                     ISQLExecutor<TCommand, TParameter> sqlExecutor, List<string> updateableFields = null)
+        {
+            _typeLookup = typeLookup;
+            _sqlConstants = sqlConstants;
+            _entityUtils = entityUtils;
+            _expressionUtils = expressionUtils;
+            SQLExecutor = sqlExecutor;
+            UpdateableFields = updateableFields;
+
+            var entityType = typeof(T);
+            Fields = _entityUtils.GetProperties(entityType);
+            BaseFields = _entityUtils.GetBaseProperties();
+        }
+
         public ISQLExecutor<TCommand, TParameter> SQLExecutor { get; set; }
         public abstract void SetSqlExecutorForTransaction(IConnectionFactory<TConnection> connectionFactory);
 
