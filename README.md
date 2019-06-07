@@ -1,6 +1,6 @@
 # standard-repository
 
-this project is an simple alternative for entity framework...
+this project is a simple alternative for entity framework...
 
 with StandardRepository;
 
