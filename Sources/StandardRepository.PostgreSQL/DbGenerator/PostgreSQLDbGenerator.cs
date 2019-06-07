@@ -22,11 +22,8 @@ namespace StandardRepository.PostgreSQL.DbGenerator
         private new readonly PostgreSQLExecutor _sqlExecutor;
         private readonly List<Type> _entityTypes;
 
-        public PostgreSQLDbGenerator(
-            TypeLookup typeLookup,
-            EntityUtils entityUtils,
-            PostgreSQLExecutor sqlExecutorMaster,
-            PostgreSQLExecutor sqlExecutor) : base(entityUtils, sqlExecutorMaster, sqlExecutor)
+        public PostgreSQLDbGenerator(TypeLookup typeLookup, EntityUtils entityUtils, PostgreSQLExecutor sqlExecutorMaster,
+                                     PostgreSQLExecutor sqlExecutor) : base(entityUtils, sqlExecutorMaster, sqlExecutor)
         {
             _typeLookup = typeLookup;
             _sqlExecutor = sqlExecutor;
@@ -180,9 +177,13 @@ namespace StandardRepository.PostgreSQL.DbGenerator
 
         private static string GetProcedureTemplate(string name)
         {
-            var templateFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var template = File.ReadAllText(Path.Combine(templateFolder, "Templates", name));
-            return template;
+            var assembly = Assembly.GetExecutingAssembly();
+
+            using (var stream = assembly.GetManifestResourceStream(assembly.GetName().Name + ".Templates." + name))
+            using (var reader = new StreamReader(stream))
+            {
+                return reader.ReadToEnd();
+            }
         }
 
         private string GetRelatedNameUpdateQueries(Type entityType, ProcedureGenerationModel model)
