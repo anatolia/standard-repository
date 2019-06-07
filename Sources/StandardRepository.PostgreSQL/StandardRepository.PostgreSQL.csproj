@@ -2,6 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
+    <Company>anatolia.solutions</Company>
+    <Authors />
+    <PackageProjectUrl>https://github.com/anatolia/standard-repository</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/anatolia/standard-repository</RepositoryUrl>
+    <PackageLicenseExpression></PackageLicenseExpression>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -46,6 +52,10 @@
     </None>
     <None Update="Templates\sp_update.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
     </None>
   </ItemGroup>
 
