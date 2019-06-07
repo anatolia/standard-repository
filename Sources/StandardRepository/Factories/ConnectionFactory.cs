@@ -10,7 +10,8 @@ namespace StandardRepository.Factories
 
         public ConnectionFactory(ConnectionSettings connectionSettings)
         {
-            _connectionString = GetConnectionString(connectionSettings.DbHost, connectionSettings.DbName, connectionSettings.DbUser, connectionSettings.DbPassword);
+            _connectionString = GetConnectionString(connectionSettings.DbHost, connectionSettings.DbName, connectionSettings.DbUser,
+                                                    connectionSettings.DbPassword, connectionSettings.DbPort);
         }
 
         public ConnectionFactory(string connectionString)
@@ -18,14 +19,15 @@ namespace StandardRepository.Factories
             _connectionString = connectionString;
         }
 
-        public static string GetConnectionString(string dbHost, string dbName, string dbUser, string dbPassword)
+        public static string GetConnectionString(string dbHost, string dbName, string dbUser, string dbPassword, string port)
         {
-            return $"Server={dbHost};Database={dbName};User Id={dbUser};Password={dbPassword};";
+            return $"Server={dbHost};Database={dbName};User Id={dbUser};Password={dbPassword};Port={port}";
         }
 
         public static string GetConnectionString(ConnectionSettings connectionSettings)
         {
-            return GetConnectionString(connectionSettings.DbHost, connectionSettings.DbName, connectionSettings.DbUser, connectionSettings.DbPassword);
+            return GetConnectionString(connectionSettings.DbHost, connectionSettings.DbName, connectionSettings.DbUser,
+                                       connectionSettings.DbPassword, connectionSettings.DbPort);
         }
 
         public TConnection Create()

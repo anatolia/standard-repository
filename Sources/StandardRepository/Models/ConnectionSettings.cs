@@ -15,6 +15,7 @@
         {
             DbNameMaster = "postgres";
             DbUserMaster = "postgres";
+            DbPort = "5432";
         }
     }
 }
