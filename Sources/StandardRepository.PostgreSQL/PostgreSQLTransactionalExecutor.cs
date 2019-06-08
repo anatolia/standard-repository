@@ -1,12 +1,12 @@
 ﻿using Npgsql;
 
-using StandardRepository.Factories;
+using StandardRepository.PostgreSQL.Factories;
 
 namespace StandardRepository.PostgreSQL
 {
     public class PostgreSQLTransactionalExecutor : TransactionalExecutor<NpgsqlConnection, NpgsqlTransaction>
     {
-        public PostgreSQLTransactionalExecutor(IConnectionFactory<NpgsqlConnection> connectionFactory) : base(connectionFactory)
+        public PostgreSQLTransactionalExecutor(PostgreSQLConnectionFactory connectionFactory) : base(connectionFactory)
         {
         }
     }
