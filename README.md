@@ -14,3 +14,6 @@ and also soft delete logic.
     Task<bool> Delete(long currentUserId, long id);
     Task<bool> UndoDelete(long currentUserId, long id);
     Task<bool> HardDelete(long currentUserId, long id);
+    
+    
+# Install-Package StandardRepository.PostgreSQL
