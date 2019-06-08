@@ -129,7 +129,35 @@ namespace StandardRepository.Helpers
                     return string.Format(formatPattern, prmName, NodeTypeToString(body.NodeType), fieldName);
                 }
 
-                return string.Format(formatPattern, GetConditions(body.Left, parameters), NodeTypeToString(body.NodeType), GetConditions(body.Right, parameters));
+                string rightPart;
+                try
+                {
+                    var memberExpressionRight = (MemberExpression)body.Right;
+                    var fieldName = GetFieldNameFromPropertyName(memberExpressionRight.Member.Name, memberExpressionRight.Expression.Type.Name, false);
+                    var lambdaExpressionRight = Expression.Lambda(memberExpressionRight);
+                    var valueRight = lambdaExpressionRight.Compile().DynamicInvoke();
+                    rightPart = AddToParameters(parameters, fieldName, memberExpressionRight.Type, valueRight);
+                }
+                catch (Exception e)
+                {
+                    rightPart = GetConditions(body.Right, parameters);
+                }
+
+                string leftPart;
+                try
+                {
+                    var memberExpressionLeft = (MemberExpression)body.Left;
+                    var fieldName = GetFieldNameFromPropertyName(memberExpressionLeft.Member.Name, memberExpressionLeft.Expression.Type.Name, false);
+                    var lambdaExpressionRight = Expression.Lambda(memberExpressionLeft);
+                    var valueLeft = lambdaExpressionRight.Compile().DynamicInvoke();
+                    leftPart = AddToParameters(parameters, fieldName, memberExpressionLeft.Type, valueLeft);
+                }
+                catch (Exception e)
+                {
+                    leftPart = GetConditions(body.Left, parameters);
+                }
+
+                return string.Format(formatPattern, leftPart, NodeTypeToString(body.NodeType), rightPart);
             }
 
             if (expression is MethodCallExpression methodCallExpression)
