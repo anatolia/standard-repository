@@ -15,5 +15,7 @@ and also soft delete logic.
     Task<bool> UndoDelete(long currentUserId, long id);
     Task<bool> HardDelete(long currentUserId, long id);
     
+## You can install this package via NuGet
+    Install-Package StandardRepository.PostgreSQL
     
-# Install-Package StandardRepository.PostgreSQL
+
