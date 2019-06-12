@@ -66,8 +66,9 @@ namespace StandardRepository
             SQLExecutor.AddParameter(resultParameters, SQLConstants.UID_PARAMETER_NAME, entity.Uid, DbType.Guid);
             SQLExecutor.AddParameter(resultParameters, SQLConstants.NAME_PARAMETER_NAME, entity.Name, DbType.String);
 
-            foreach (var field in Fields)
+            for (var i = 0; i < Fields.Length; i++)
             {
+                var field = Fields[i];
                 if (BaseFields.Any(x => x.Name == field.Name))
                 {
                     continue;
@@ -99,8 +100,9 @@ namespace StandardRepository
             var commandParameters = GetParametersForIdAndCurrentUser(currentUserId, entity.Id);
             SQLExecutor.AddParameter(commandParameters, SQLConstants.NAME_PARAMETER_NAME, entity.Name, DbType.String);
 
-            foreach (var field in Fields)
+            for (var i = 0; i < Fields.Length; i++)
             {
+                var field = Fields[i];
                 var parameters = GetParameterInfoFromField(entity, field);
                 commandParameters.AddRange(parameters);
             }
@@ -404,26 +406,12 @@ namespace StandardRepository
         private TParameter[] GetParameterInfoFromField(T entity, PropertyInfo field)
         {
             var prms = new List<TParameter>();
+
             var parameterName = _entityUtils.GetParameterNameFromPropertyName(field.Name);
+            var dbType = _typeLookup.GetDbType(field.PropertyType);
             var valueFromProperty = GetValueFromProperty(entity, field);
 
-            if (field.PropertyType.BaseType == typeof(BaseEntity))
-            {
-                var relatedEntity = (BaseEntity)valueFromProperty;
-                if (relatedEntity != null)
-                {
-                    SQLExecutor.AddParameter(prms, parameterName + "_id", relatedEntity.Id, DbType.Int64);
-                    SQLExecutor.AddParameter(prms, parameterName + "_uid", relatedEntity.Uid, DbType.Guid);
-                    SQLExecutor.AddParameter(prms, parameterName + "_name", relatedEntity.Name, DbType.String);
-                }
-            }
-            else
-            {
-                var dbType = _typeLookup.GetDbType(field.PropertyType);
-                var parameterValue = valueFromProperty ?? DBNull.Value;
-
-                SQLExecutor.AddParameter(prms, parameterName, parameterValue, dbType);
-            }
+            SQLExecutor.AddParameter(prms, parameterName, valueFromProperty, dbType);
 
             return prms.ToArray();
         }
@@ -436,12 +424,12 @@ namespace StandardRepository
             if (property.PropertyType == typeof(string)
                 && string.IsNullOrWhiteSpace(Convert.ToString(value)))
             {
-                return "";
+                return string.Empty;
             }
 
             if (value == null)
             {
-                return null;
+                return DBNull.Value;
             }
 
             if (property.PropertyType == typeof(Instant)

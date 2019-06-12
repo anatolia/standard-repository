@@ -39,7 +39,7 @@ namespace StandardRepository.Helpers
 
         public string GetTableName(Type entityType)
         {
-            return GetFieldNameFromPropertyName(entityType.Name, null);
+            return GetFieldNameFromPropertyName(entityType.Name);
         }
 
         public string GetTableFullName(Type entityType)
@@ -49,7 +49,7 @@ namespace StandardRepository.Helpers
 
         public string GetParameterNameFromPropertyName(string propertyName)
         {
-            return $"prm_{GetFieldNameFromPropertyName(propertyName, null)}";
+            return $"prm_{GetFieldNameFromPropertyName(propertyName)}";
         }
         #endregion
 
@@ -161,12 +161,12 @@ namespace StandardRepository.Helpers
 
                 if (prop != null)
                 {
-                    if (prop.PropertyType == typeof(Instant)
+                    if ((prop.PropertyType == typeof(Instant)
                         || prop.PropertyType == typeof(Instant?))
+                        && value is DateTime datetimeValue)
                     {
-                        var dateTime = Convert.ToDateTime(value);
-                        dateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
-                        var instant = Instant.FromDateTimeUtc(dateTime);
+                        datetimeValue = DateTime.SpecifyKind(datetimeValue, DateTimeKind.Utc);
+                        var instant = Instant.FromDateTimeUtc(datetimeValue);
                         prop.SetValue(entity, instant, null);
                     }
                     else

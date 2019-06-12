@@ -148,8 +148,8 @@ namespace StandardRepository.Helpers
                 {
                     var memberExpressionLeft = (MemberExpression)body.Left;
                     var fieldName = GetFieldNameFromPropertyName(memberExpressionLeft.Member.Name, memberExpressionLeft.Expression.Type.Name, false);
-                    var lambdaExpressionRight = Expression.Lambda(memberExpressionLeft);
-                    var valueLeft = lambdaExpressionRight.Compile().DynamicInvoke();
+                    var lambdaExpressionLeft = Expression.Lambda(memberExpressionLeft);
+                    var valueLeft = lambdaExpressionLeft.Compile().DynamicInvoke();
                     leftPart = AddToParameters(parameters, fieldName, memberExpressionLeft.Type, valueLeft);
                 }
                 catch (Exception e)
@@ -198,7 +198,7 @@ namespace StandardRepository.Helpers
                 prmName = prmName + "_" + (parameters.Keys.Count(x => x.StartsWith(prmName)) + 1);
             }
 
-            parameters.Add(prmName, new DbParameterInfo(prmName, value, prmType));
+            parameters.Add(prmName, new DbParameterInfo(prmName, value ?? DBNull.Value, prmType));
             return prmName;
         }
 

@@ -150,8 +150,9 @@ namespace StandardRepository.Helpers.SqlExecutor
 
             if (parameters != null)
             {
-                foreach (var parameter in parameters)
+                for (var i = 0; i < parameters.Count; i++)
                 {
+                    var parameter = parameters[i];
                     command.Parameters.Add(parameter);
                 }
             }
@@ -189,8 +190,9 @@ namespace StandardRepository.Helpers.SqlExecutor
 
             if (parameters != null)
             {
-                foreach (var parameter in parameters)
+                for (var i = 0; i < parameters.Count; i++)
                 {
+                    var parameter = parameters[i];
                     command.Parameters.Add(parameter);
                 }
             }
@@ -220,8 +222,9 @@ namespace StandardRepository.Helpers.SqlExecutor
 
             if (parameters != null)
             {
-                foreach (var parameter in parameters)
+                for (var i = 0; i < parameters.Count; i++)
                 {
+                    var parameter = parameters[i];
                     command.Parameters.Add(parameter);
                 }
             }
