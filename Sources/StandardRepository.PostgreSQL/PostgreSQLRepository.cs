@@ -41,6 +41,8 @@ namespace StandardRepository.PostgreSQL
 
             QuerySelectRevisions = $"{SQLConstants.SELECT} * {SQLConstants.FROM} {_sqlConstants.ProcedureNameSelectRevisions} (:{_sqlConstants.IdParameterName});";
             QueryRestoreRevision = $"{PostgreSQLConstants.CALL} {_sqlConstants.ProcedureNameRestoreRevision} (:{SQLConstants.UPDATED_BY_PARAMETER_NAME},:{_sqlConstants.IdParameterName},:{SQLConstants.REVISION_PARAMETER_NAME}, null);";
+
+            NpgsqlConnection.GlobalTypeMapper.UseNodaTime();
         }
 
         public override void SetSqlExecutorForTransaction(IConnectionFactory<NpgsqlConnection> connectionFactory)
