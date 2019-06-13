@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using NodaTime;
 using NpgsqlTypes;
 
 using StandardRepository.Helpers;
@@ -26,9 +25,7 @@ namespace StandardRepository.PostgreSQL.Helpers
             [typeof(Guid)] = NpgsqlDbType.Uuid.ToString(),
             [typeof(Guid?)] = NpgsqlDbType.Uuid.ToString(),
             [typeof(DateTime)] = NpgsqlDbType.Timestamp.ToString(),
-            [typeof(DateTime?)] = NpgsqlDbType.Timestamp.ToString(),
-            [typeof(Instant)] = NpgsqlDbType.Timestamp.ToString(),
-            [typeof(Instant?)] = NpgsqlDbType.Timestamp.ToString()
+            [typeof(DateTime?)] = NpgsqlDbType.Timestamp.ToString()
         };
 
         public override string GetSqlDbTypeName(Type type) => _types[type];

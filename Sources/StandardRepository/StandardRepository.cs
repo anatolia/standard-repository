@@ -8,7 +8,7 @@ using System.Reflection;
 using System.Security;
 using System.Text;
 using System.Threading.Tasks;
-using NodaTime;
+
 using StandardRepository.Factories;
 using StandardRepository.Helpers;
 using StandardRepository.Helpers.SqlExecutor;
@@ -430,12 +430,6 @@ namespace StandardRepository
             if (value == null)
             {
                 return DBNull.Value;
-            }
-
-            if (property.PropertyType == typeof(Instant)
-                || property.PropertyType == typeof(Instant?))
-            {
-                return ((Instant)value).ToDateTimeUtc();
             }
 
             return value;

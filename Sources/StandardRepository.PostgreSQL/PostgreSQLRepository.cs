@@ -41,8 +41,6 @@ namespace StandardRepository.PostgreSQL
 
             QuerySelectRevisions = $"{SQLConstants.SELECT} * {SQLConstants.FROM} {_sqlConstants.ProcedureNameSelectRevisions} (:{_sqlConstants.IdParameterName});";
             QueryRestoreRevision = $"{PostgreSQLConstants.CALL} {_sqlConstants.ProcedureNameRestoreRevision} (:{SQLConstants.UPDATED_BY_PARAMETER_NAME},:{_sqlConstants.IdParameterName},:{SQLConstants.REVISION_PARAMETER_NAME}, null);";
-
-            NpgsqlConnection.GlobalTypeMapper.UseNodaTime();
         }
 
         public override void SetSqlExecutorForTransaction(IConnectionFactory<NpgsqlConnection> connectionFactory)
@@ -122,7 +120,7 @@ namespace StandardRepository.PostgreSQL
         }
 
         public override async Task<List<T>> SelectAfter(Expression<Func<T, bool>> @where, long lastId, int take = 100,
-                                                  Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false)
+                                                        Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false)
         {
             var sb = new StringBuilder();
             sb.Append($"{SQLConstants.SELECT} *{Environment.NewLine}");
@@ -156,7 +154,7 @@ namespace StandardRepository.PostgreSQL
         }
 
         public override async Task<List<T>> SelectAfter(Expression<Func<T, bool>> @where, Guid lastUid, int take = 100,
-                                                  Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false)
+                                                        Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false)
         {
             var sb = new StringBuilder();
             sb.Append($"{SQLConstants.SELECT} *{Environment.NewLine}");

@@ -2,27 +2,26 @@
 using System.Linq;
 using System.Reflection;
 
-using NodaTime;
 using Shouldly;
 
 namespace StandardRepository.Tests.UnitTests.Models.Entities
 {
     public class EntityTestHelper
     {
-        public void AssertInstantProperty(PropertyInfo[] properties, string propertyName, Instant propertyValue)
+        public void AssertDateTimeProperty(PropertyInfo[] properties, string propertyName, DateTime propertyValue)
         {
             propertyValue.ShouldNotBeNull();
 
             var propertyInfo = properties.First(x => x.Name == propertyName);
-            propertyInfo.PropertyType.ShouldBe(typeof(Instant));
+            propertyInfo.PropertyType.ShouldBe(typeof(DateTime));
         }
 
-        public void AssertNullableInstantProperty(PropertyInfo[] properties, string propertyName, Instant? propertyValue)
+        public void AssertNullableDateTimeProperty(PropertyInfo[] properties, string propertyName, DateTime? propertyValue)
         {
             propertyValue.ShouldBeNull();
 
             var propertyInfo = properties.First(x => x.Name == propertyName);
-            propertyInfo.PropertyType.ShouldBe(typeof(Instant?));
+            propertyInfo.PropertyType.ShouldBe(typeof(DateTime?));
         }
 
         public void AssertStringProperty(PropertyInfo[] properties, string propertyName, string propertyValue)

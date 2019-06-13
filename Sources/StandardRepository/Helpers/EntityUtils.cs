@@ -4,8 +4,6 @@ using System.Data;
 using System.Linq;
 using System.Reflection;
 
-using NodaTime;
-
 using StandardRepository.Models.Entities;
 
 namespace StandardRepository.Helpers
@@ -152,6 +150,10 @@ namespace StandardRepository.Helpers
             {
                 var fieldName = reader.GetName(i);
                 var prop = properties.FirstOrDefault(x => GetFieldNameFromPropertyName(x.Name, entityTypeName) == fieldName);
+                if (prop == null)
+                {
+                    continue;
+                }
 
                 var value = reader[i];
                 if (value == DBNull.Value)
@@ -159,29 +161,7 @@ namespace StandardRepository.Helpers
                     continue;
                 }
 
-                if (prop != null)
-                {
-                    if ((prop.PropertyType == typeof(Instant)
-                        || prop.PropertyType == typeof(Instant?))
-                        && value is DateTime datetimeValue)
-                    {
-                        datetimeValue = DateTime.SpecifyKind(datetimeValue, DateTimeKind.Utc);
-                        var instant = Instant.FromDateTimeUtc(datetimeValue);
-                        prop.SetValue(entity, instant, null);
-                    }
-                    else
-                    {
-                        prop.SetValue(entity, value, null);
-                    }
-
-                    continue;
-                }
-
-                prop = properties.FirstOrDefault(x => GetFieldNameFromPropertyName(x.Name, entityTypeName) == fieldName.Replace((GetFieldNameFromPropertyName(entityTypeName) + "_"), string.Empty));
-                if (prop != null)
-                {
-                    prop.SetValue(entity, value, null);
-                }
+                prop.SetValue(entity, value, null);
             }
         }
 
@@ -191,9 +171,7 @@ namespace StandardRepository.Helpers
             revision.Id = Convert.ToInt64(reader[entityTypeName.GetFieldNameFromPropertyName() + "_id"]);
             revision.Revision = Convert.ToInt32(reader["revision"]);
             revision.RevisionedBy = Convert.ToInt64(reader["revisioned_by"]);
-            var revisionedAt = Convert.ToDateTime(reader["revisioned_at"]);
-            revisionedAt = DateTime.SpecifyKind(revisionedAt, DateTimeKind.Utc);
-            revision.RevisionedAt = Instant.FromDateTimeUtc(revisionedAt);
+            revision.RevisionedAt = Convert.ToDateTime(reader["revisioned_at"]);
 
             revision.Entity = new T();
             MapFields(reader, properties, entityTypeName, revision.Entity);

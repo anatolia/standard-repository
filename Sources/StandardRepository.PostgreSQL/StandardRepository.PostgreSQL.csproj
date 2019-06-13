@@ -9,7 +9,7 @@
     <PackageLicenseExpression></PackageLicenseExpression>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <Description>a postresql data access layer which comes with record revision history and soft delete logic.</Description>
-    <Version>1.0.0.6</Version>
+    <Version>1.0.1.0</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
@@ -56,9 +56,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NodaTime" Version="2.4.5" />
     <PackageReference Include="Npgsql" Version="4.0.7" />
-    <PackageReference Include="Npgsql.NodaTime" Version="4.0.7" />
   </ItemGroup>
 
   <ItemGroup>

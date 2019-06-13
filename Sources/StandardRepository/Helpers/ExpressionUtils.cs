@@ -5,8 +5,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-using NodaTime;
-
 using StandardRepository.Models;
 using StandardRepository.Models.Entities;
 
@@ -55,8 +53,8 @@ namespace StandardRepository.Helpers
                 }
                 var fieldName = GetFieldNameFromPropertyName(member.Member.Name, member.Expression.Type.Name, isRelatedEntityProperty);
 
-                if (member.Member.DeclaringType == typeof(Instant)
-                    || member.Member.DeclaringType == typeof(Instant?))
+                if (member.Member.DeclaringType == typeof(DateTime)
+                    || member.Member.DeclaringType == typeof(DateTime?))
                 {
                     var objectMember = Expression.Convert(member, typeof(object));
                     var getterLambda = Expression.Lambda<Func<object>>(objectMember);

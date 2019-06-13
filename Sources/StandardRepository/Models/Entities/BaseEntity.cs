@@ -1,7 +1,5 @@
 ﻿using System;
 
-using NodaTime;
-
 namespace StandardRepository.Models.Entities
 {
     public class BaseEntity
@@ -11,18 +9,18 @@ namespace StandardRepository.Models.Entities
         public string Name { get; set; }
 
         public long CreatedBy { get; set; }
-        public Instant CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; }
 
         public long? UpdatedBy { get; set; }
-        public Instant? UpdatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
 
         public long? DeletedBy { get; set; }
-        public Instant? DeletedAt { get; set; }
+        public DateTime? DeletedAt { get; set; }
         public bool IsDeleted { get; set; }
 
         public BaseEntity()
         {
-            CreatedAt = SystemClock.Instance.GetCurrentInstant();
+            CreatedAt = DateTime.UtcNow;
             Uid = Guid.NewGuid();
             Name = string.Empty;
         }

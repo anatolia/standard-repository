@@ -21,7 +21,7 @@ namespace StandardRepository.Tests.UnitTests.Models.Entities
             AssertLongProperty(properties, "Id", entity.Id);
             AssertIntegerProperty(properties, "Revision", entity.Revision);
             AssertLongProperty(properties, "RevisionedBy", entity.RevisionedBy);
-            AssertInstantProperty(properties, "RevisionedAt", entity.RevisionedAt);
+            AssertDateTimeProperty(properties, "RevisionedAt", entity.RevisionedAt);
 
             var propFirstName = properties.First(x => x.Name == "Entity");
             propFirstName.PropertyType.Name.ShouldBe(nameof(BaseEntity));

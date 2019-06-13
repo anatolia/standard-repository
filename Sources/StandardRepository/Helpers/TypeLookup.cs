@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 
-using NodaTime;
-
 namespace StandardRepository.Helpers
 {
     public abstract class TypeLookup
@@ -43,9 +41,7 @@ namespace StandardRepository.Helpers
             [typeof(char?)] = DbType.StringFixedLength,
             [typeof(Guid?)] = DbType.Guid,
             [typeof(DateTime?)] = DbType.DateTime2,
-            [typeof(DateTimeOffset?)] = DbType.DateTimeOffset,
-            [typeof(Instant)] = DbType.DateTime2,
-            [typeof(Instant?)] = DbType.DateTime2
+            [typeof(DateTimeOffset?)] = DbType.DateTimeOffset
         };
 
         public bool HasDbType(Type type) => _type2DbType.ContainsKey(type);

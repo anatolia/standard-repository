@@ -1,4 +1,4 @@
-﻿using NodaTime;
+﻿using System;
 
 namespace StandardRepository.Models.Entities
 {
@@ -7,7 +7,7 @@ namespace StandardRepository.Models.Entities
         public long Id { get; set; }
         public int Revision { get; set; }
         public long RevisionedBy { get; set; }
-        public Instant RevisionedAt { get; set; }
+        public DateTime RevisionedAt { get; set; }
 
         public T Entity { get; set; }
     }

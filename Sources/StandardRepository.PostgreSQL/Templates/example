@@ -13,7 +13,7 @@ RETURNS TABLE
     decimal_null_field numeric,
     boolean_field boolean,
     text_field text,
-    instant_field timestamp,
+    DateTime_field timestamp,
     other_test_entity_id bigint,
     other_test_entity_uid uuid,
     other_test_entity_name text,
@@ -32,7 +32,7 @@ AS $$
 BEGIN
 
     RETURN QUERY
-    SELECT  t.test_entity_id,t.test_entity_uid,t.name,t.number_field,t.other_number_field,t.decimal_field,t.decimal_null_field,t.boolean_field,t.text_field,t.instant_field,t.other_test_entity_id,t.other_test_entity_uid,t.other_test_entity_name,t.created_by,t.created_at,t.updated_by,t.updated_at,t.deleted_by,t.deleted_at,t.is_deleted,t.revision,t.revisioned_by,t.revisioned_at
+    SELECT  t.test_entity_id,t.test_entity_uid,t.name,t.number_field,t.other_number_field,t.decimal_field,t.decimal_null_field,t.boolean_field,t.text_field,t.DateTime_field,t.other_test_entity_id,t.other_test_entity_uid,t.other_test_entity_name,t.created_by,t.created_at,t.updated_by,t.updated_at,t.deleted_by,t.deleted_at,t.is_deleted,t.revision,t.revisioned_by,t.revisioned_at
     FROM main.test_entity_revision t
     WHERE t.test_entity_id = prm_test_entity_id AND t.is_deleted = false;
 
@@ -47,8 +47,8 @@ CREATE OR REPLACE PROCEDURE main.test_entity_save_revision
 AS $$
 BEGIN
 
-    INSERT INTO main.test_entity_revision (test_entity_id,test_entity_uid,name,number_field,other_number_field,decimal_field,decimal_null_field,boolean_field,text_field,instant_field,other_test_entity_id,other_test_entity_uid,other_test_entity_name,created_by,created_at,updated_by,updated_at,deleted_by,deleted_at,is_deleted,revision,revisioned_by,revisioned_at)
-    SELECT t.test_entity_id,t.test_entity_uid,t.name,t.number_field,t.other_number_field,t.decimal_field,t.decimal_null_field,t.boolean_field,t.text_field,t.instant_field,t.other_test_entity_id,t.other_test_entity_uid,t.other_test_entity_name,t.created_by,t.created_at,t.updated_by,t.updated_at,t.deleted_by,t.deleted_at,t.is_deleted,
+    INSERT INTO main.test_entity_revision (test_entity_id,test_entity_uid,name,number_field,other_number_field,decimal_field,decimal_null_field,boolean_field,text_field,DateTime_field,other_test_entity_id,other_test_entity_uid,other_test_entity_name,created_by,created_at,updated_by,updated_at,deleted_by,deleted_at,is_deleted,revision,revisioned_by,revisioned_at)
+    SELECT t.test_entity_id,t.test_entity_uid,t.name,t.number_field,t.other_number_field,t.decimal_field,t.decimal_null_field,t.boolean_field,t.text_field,t.DateTime_field,t.other_test_entity_id,t.other_test_entity_uid,t.other_test_entity_name,t.created_by,t.created_at,t.updated_by,t.updated_at,t.deleted_by,t.deleted_at,t.is_deleted,
            COALESCE((SELECT rev.revision FROM main.test_entity_revision rev
                      WHERE rev.test_entity_id = t.test_entity_id
                      ORDER BY rev.revision desc limit 1), 0) + 1, prm_updated_by, now()
@@ -91,11 +91,11 @@ BEGIN
     decimal_null_field = rev.decimal_null_field,
     boolean_field = rev.boolean_field,
     text_field = rev.text_field,
-    instant_field = rev.instant_field,
+    DateTime_field = rev.DateTime_field,
     other_test_entity_id = rev.other_test_entity_id,
     other_test_entity_uid = rev.other_test_entity_uid,
     other_test_entity_name = rev.other_test_entity_name
-	FROM (SELECT  r.test_entity_uid,r.name,r.number_field,r.other_number_field,r.decimal_field,r.decimal_null_field,r.boolean_field,r.text_field,r.instant_field,r.other_test_entity_id,r.other_test_entity_uid,r.other_test_entity_name,r.updated_by
+	FROM (SELECT  r.test_entity_uid,r.name,r.number_field,r.other_number_field,r.decimal_field,r.decimal_null_field,r.boolean_field,r.text_field,r.DateTime_field,r.other_test_entity_id,r.other_test_entity_uid,r.other_test_entity_name,r.updated_by
           FROM main.test_entity_revision r
           WHERE r.test_entity_id = prm_test_entity_id AND r.revision = prm_revision
           ) AS rev
@@ -121,7 +121,7 @@ CREATE OR REPLACE FUNCTION main.test_entity_insert
     prm_decimal_null_field numeric,
     prm_boolean_field boolean,
     prm_text_field text,
-    prm_instant_field timestamp,
+    prm_DateTime_field timestamp,
     prm_other_test_entity_id bigint,
     prm_other_test_entity_uid uuid,
     prm_other_test_entity_name text
@@ -129,8 +129,8 @@ CREATE OR REPLACE FUNCTION main.test_entity_insert
 AS $$
 BEGIN
 
-    INSERT INTO main.test_entity (test_entity_uid,name,number_field,other_number_field,decimal_field,decimal_null_field,boolean_field,text_field,instant_field,other_test_entity_id,other_test_entity_uid,other_test_entity_name,created_by,created_at,updated_by,updated_at,deleted_by,deleted_at,is_deleted)
-    VALUES (prm_uid,prm_name,prm_number_field,prm_other_number_field,prm_decimal_field,prm_decimal_null_field,prm_boolean_field,prm_text_field,prm_instant_field,prm_other_test_entity_id,prm_other_test_entity_uid,prm_other_test_entity_name,prm_updated_by,now(),null,null,null,null,false)
+    INSERT INTO main.test_entity (test_entity_uid,name,number_field,other_number_field,decimal_field,decimal_null_field,boolean_field,text_field,DateTime_field,other_test_entity_id,other_test_entity_uid,other_test_entity_name,created_by,created_at,updated_by,updated_at,deleted_by,deleted_at,is_deleted)
+    VALUES (prm_uid,prm_name,prm_number_field,prm_other_number_field,prm_decimal_field,prm_decimal_null_field,prm_boolean_field,prm_text_field,prm_DateTime_field,prm_other_test_entity_id,prm_other_test_entity_uid,prm_other_test_entity_name,prm_updated_by,now(),null,null,null,null,false)
     RETURNING test_entity_id
     INTO return_id;
 
@@ -148,7 +148,7 @@ CREATE OR REPLACE PROCEDURE main.test_entity_update
     prm_decimal_null_field numeric,
     prm_boolean_field boolean,
     prm_text_field text,
-    prm_instant_field timestamp,
+    prm_DateTime_field timestamp,
     prm_other_test_entity_id bigint,
     prm_other_test_entity_uid uuid,
     prm_other_test_entity_name text  
@@ -168,7 +168,7 @@ BEGIN
     decimal_null_field = prm_decimal_null_field,
     boolean_field = prm_boolean_field,
     text_field = prm_text_field,
-    instant_field = prm_instant_field,
+    DateTime_field = prm_DateTime_field,
     other_test_entity_id = prm_other_test_entity_id,
     other_test_entity_uid = prm_other_test_entity_uid,
     other_test_entity_name = prm_other_test_entity_name
@@ -195,7 +195,7 @@ RETURNS TABLE
     decimal_null_field numeric,
     boolean_field boolean,
     text_field text,
-    instant_field timestamp,
+    DateTime_field timestamp,
     other_test_entity_id bigint,
     other_test_entity_uid uuid,
     other_test_entity_name text,
@@ -211,7 +211,7 @@ AS $$
 BEGIN
 
     RETURN QUERY
-    SELECT  t.test_entity_id,t.test_entity_uid,t.name,t.number_field,t.other_number_field,t.decimal_field,t.decimal_null_field,t.boolean_field,t.text_field,t.instant_field,t.other_test_entity_id,t.other_test_entity_uid,t.other_test_entity_name,t.created_by,t.created_at,t.updated_by,t.updated_at,t.deleted_by,t.deleted_at,t.is_deleted
+    SELECT  t.test_entity_id,t.test_entity_uid,t.name,t.number_field,t.other_number_field,t.decimal_field,t.decimal_null_field,t.boolean_field,t.text_field,t.DateTime_field,t.other_test_entity_id,t.other_test_entity_uid,t.other_test_entity_name,t.created_by,t.created_at,t.updated_by,t.updated_at,t.deleted_by,t.deleted_at,t.is_deleted
     FROM main.test_entity t
     WHERE t.test_entity_id = prm_test_entity_id AND t.is_deleted = false;
 

@@ -31,13 +31,13 @@ namespace StandardRepository.Tests.UnitTests.Models.Entities
             AssertStringProperty(properties, "Name", entity.Name);
 
             AssertLongProperty(properties, "CreatedBy", entity.CreatedBy);
-            AssertInstantProperty(properties, "CreatedAt", entity.CreatedAt);
+            AssertDateTimeProperty(properties, "CreatedAt", entity.CreatedAt);
 
             AssertLongProperty(properties, "UpdatedBy", entity.UpdatedBy);
-            AssertNullableInstantProperty(properties, "UpdatedAt", entity.UpdatedAt);
+            AssertNullableDateTimeProperty(properties, "UpdatedAt", entity.UpdatedAt);
 
             AssertLongProperty(properties, "DeletedBy", entity.DeletedBy);
-            AssertNullableInstantProperty(properties, "DeletedAt", entity.DeletedAt);
+            AssertNullableDateTimeProperty(properties, "DeletedAt", entity.DeletedAt);
             AssertBooleanProperty(properties, "IsDeleted", entity.IsDeleted);
         }
     }
