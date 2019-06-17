@@ -188,7 +188,7 @@ namespace StandardRepository.PostgreSQL
                 var schemaName = _entityUtils.GetSchemaName(typeof(T));
                 var tableName = _entityUtils.GetTableName(typeof(T));
 
-                if (where == null && !isIncludeDeleted)
+                if (where == null && isIncludeDeleted)
                 {
                     sb.Append($"{SQLConstants.WHERE}");
                 }
