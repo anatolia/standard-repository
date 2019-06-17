@@ -7,11 +7,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{9BE268
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{F0225805-348C-49A5-9C72-CA0F3DCBBA74}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardRepository", "Sources\StandardRepository\StandardRepository.csproj", "{B33ED6B6-97FB-4047-88FB-001A166686AA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StandardRepository", "Sources\StandardRepository\StandardRepository.csproj", "{B33ED6B6-97FB-4047-88FB-001A166686AA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardRepository.Tests", "Tests\StandardRepository.Tests\StandardRepository.Tests.csproj", "{016E8EC7-F5CE-4EAC-B086-B5C099C6BA85}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StandardRepository.Tests", "Tests\StandardRepository.Tests\StandardRepository.Tests.csproj", "{016E8EC7-F5CE-4EAC-B086-B5C099C6BA85}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardRepository.PostgreSQL", "Sources\StandardRepository.PostgreSQL\StandardRepository.PostgreSQL.csproj", "{D768CDA4-B46A-48C9-A61A-94D71CDA8C72}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StandardRepository.PostgreSQL", "Sources\StandardRepository.PostgreSQL\StandardRepository.PostgreSQL.csproj", "{D768CDA4-B46A-48C9-A61A-94D71CDA8C72}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardRepository.PostgreSQL.Tests", "Tests\StandardRepository.PostgreSQL.Tests\StandardRepository.PostgreSQL.Tests.csproj", "{7B7954B5-2B86-4FD9-B133-C41F079DB349}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +33,10 @@ Global
 		{D768CDA4-B46A-48C9-A61A-94D71CDA8C72}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D768CDA4-B46A-48C9-A61A-94D71CDA8C72}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D768CDA4-B46A-48C9-A61A-94D71CDA8C72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B7954B5-2B86-4FD9-B133-C41F079DB349}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B7954B5-2B86-4FD9-B133-C41F079DB349}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B7954B5-2B86-4FD9-B133-C41F079DB349}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B7954B5-2B86-4FD9-B133-C41F079DB349}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -39,6 +45,7 @@ Global
 		{B33ED6B6-97FB-4047-88FB-001A166686AA} = {9BE2689D-04D0-4F63-B137-06BF66DDA6A7}
 		{016E8EC7-F5CE-4EAC-B086-B5C099C6BA85} = {F0225805-348C-49A5-9C72-CA0F3DCBBA74}
 		{D768CDA4-B46A-48C9-A61A-94D71CDA8C72} = {9BE2689D-04D0-4F63-B137-06BF66DDA6A7}
+		{7B7954B5-2B86-4FD9-B133-C41F079DB349} = {F0225805-348C-49A5-9C72-CA0F3DCBBA74}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4EDAADEA-9A55-4D96-B353-0B960F3A6AA4}

@@ -9,7 +9,7 @@ namespace StandardRepository.Helpers
 {
     public static class NamingUtils
     {
-        public static string GetFieldNameFromPropertyName(this string propertyName, string entityTypeName = null, bool isRelatedEntityProperty = false)
+        public static string GetFieldNameFromPropertyName(this string propertyName, string entityTypeName = null)
         {
             if (string.IsNullOrWhiteSpace(entityTypeName))
             {
@@ -26,9 +26,9 @@ namespace StandardRepository.Helpers
                 return GetDelimitedName(entityTypeName) + "_uid";
             }
 
-            if (isRelatedEntityProperty)
+            if (propertyName == nameof(BaseEntity.Name))
             {
-                return GetDelimitedName(entityTypeName) + "_" + GetDelimitedName(propertyName);
+                return GetDelimitedName(entityTypeName) + "_name";
             }
 
             return GetDelimitedName(propertyName);

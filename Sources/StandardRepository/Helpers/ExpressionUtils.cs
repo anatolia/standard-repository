@@ -6,7 +6,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 
 using StandardRepository.Models;
-using StandardRepository.Models.Entities;
 
 namespace StandardRepository.Helpers
 {
@@ -24,35 +23,16 @@ namespace StandardRepository.Helpers
         }
 
         public abstract DbType GetDbType(Type type);
-        public abstract string GetFieldNameFromPropertyName(string propertyName, string entityTypeName, bool isRelatedEntityProperty);
+
+        public string GetFieldNameFromPropertyName(string propertyName, string entityTypeName)
+        {
+            return propertyName.GetFieldNameFromPropertyName(entityTypeName);
+        }
 
         public string GetConditions(Expression expression, Dictionary<string, DbParameterInfo> parameters)
         {
             if (expression is MemberExpression member)
             {
-                var isRelatedEntityProperty = false;
-                if (member.Expression is MemberExpression parentExpression)
-                {
-                    if (member.Member.DeclaringType.IsAssignableFrom(typeof(BaseEntity)))
-                    {
-                        isRelatedEntityProperty = member.Expression.Type != parentExpression.Expression.Type;
-                    }
-                    else
-                    {
-                        isRelatedEntityProperty = true;
-
-                        if (member.Member is PropertyInfo memberPropertyInfo)
-                        {
-                            var lambdaExpression = Expression.Lambda(expression);
-                            var value = lambdaExpression.Compile().DynamicInvoke();
-                            var prmName = GetFieldNameFromPropertyName(member.Member.Name, member.Expression.Type.Name, true);
-                            prmName = AddToParameters(parameters, prmName, memberPropertyInfo.PropertyType, value);
-                            return prmName;
-                        }
-                    }
-                }
-                var fieldName = GetFieldNameFromPropertyName(member.Member.Name, member.Expression.Type.Name, isRelatedEntityProperty);
-
                 if (member.Member.DeclaringType == typeof(DateTime)
                     || member.Member.DeclaringType == typeof(DateTime?))
                 {
@@ -61,9 +41,22 @@ namespace StandardRepository.Helpers
                     var getter = getterLambda.Compile();
                     var value = getter();
 
-                    var prmName = AddToParameters(parameters, fieldName, member.Member.DeclaringType, value);
+                    var prmName = AddToParameters(parameters, "date", member.Member.DeclaringType, value);
                     return prmName;
                 }
+
+                if (member.Expression is MemberExpression parentExpression)
+                {
+                    if (member.Member is PropertyInfo memberPropertyInfo)
+                    {
+                        var lambdaExpression = Expression.Lambda(expression);
+                        var value = lambdaExpression.Compile().DynamicInvoke();
+                        var prmName = GetFieldNameFromPropertyName(member.Member.Name, member.Expression.Type.Name);
+                        prmName = AddToParameters(parameters, prmName, memberPropertyInfo.PropertyType, value);
+                        return prmName;
+                    }
+                }
+                var fieldName = GetFieldNameFromPropertyName(member.Member.Name, member.Expression.Type.Name);
 
                 if (member.Member is FieldInfo memberFieldInfo)
                 {
@@ -78,7 +71,13 @@ namespace StandardRepository.Helpers
 
             if (expression is UnaryExpression unary)
             {
-                return $"{NodeTypeToString(unary.NodeType)} {GetConditions(unary.Operand, parameters)}";
+                var nodeTypeToString = NodeTypeToString(unary.NodeType);
+                if (string.IsNullOrWhiteSpace(nodeTypeToString))
+                {
+                    return GetConditions(unary.Operand, parameters);
+                }
+
+                return $"{nodeTypeToString} {GetConditions(unary.Operand, parameters)}";
             }
 
             if (expression is BinaryExpression body)
@@ -100,12 +99,7 @@ namespace StandardRepository.Helpers
                     var value = ((ConstantExpression)body.Right).Value;
                     var memberExpression = (MemberExpression)body.Left;
 
-                    var isRelatedEntityProperty = false;
-                    if (memberExpression.Expression is MemberExpression parentExpression)
-                    {
-                        isRelatedEntityProperty = memberExpression.Expression.Type != parentExpression.Expression.Type;
-                    }
-                    var fieldName = GetFieldNameFromPropertyName(memberExpression.Member.Name, memberExpression.Expression.Type.Name, isRelatedEntityProperty);
+                    var fieldName = GetFieldNameFromPropertyName(memberExpression.Member.Name, memberExpression.Expression.Type.Name);
                     var prmName = AddToParameters(parameters, fieldName, memberExpression.Type, value);
 
                     return string.Format(formatPattern, fieldName, NodeTypeToString(body.NodeType), prmName);
@@ -115,13 +109,7 @@ namespace StandardRepository.Helpers
                 {
                     var value = ((ConstantExpression)body.Left).Value;
                     var memberExpression = (MemberExpression)body.Right;
-
-                    var isRelatedEntityProperty = false;
-                    if (memberExpression.Expression is MemberExpression parentExpression)
-                    {
-                        isRelatedEntityProperty = memberExpression.Expression.Type != parentExpression.Expression.Type;
-                    }
-                    var fieldName = GetFieldNameFromPropertyName(memberExpression.Member.Name, memberExpression.Expression.Type.Name, isRelatedEntityProperty);
+                    var fieldName = GetFieldNameFromPropertyName(memberExpression.Member.Name, memberExpression.Expression.Type.Name);
                     var prmName = AddToParameters(parameters, fieldName, memberExpression.Type, value);
 
                     return string.Format(formatPattern, prmName, NodeTypeToString(body.NodeType), fieldName);
@@ -131,7 +119,7 @@ namespace StandardRepository.Helpers
                 try
                 {
                     var memberExpressionRight = (MemberExpression)body.Right;
-                    var fieldName = GetFieldNameFromPropertyName(memberExpressionRight.Member.Name, memberExpressionRight.Expression.Type.Name, false);
+                    var fieldName = GetFieldNameFromPropertyName(memberExpressionRight.Member.Name, memberExpressionRight.Expression.Type.Name);
                     var lambdaExpressionRight = Expression.Lambda(memberExpressionRight);
                     var valueRight = lambdaExpressionRight.Compile().DynamicInvoke();
                     rightPart = AddToParameters(parameters, fieldName, memberExpressionRight.Type, valueRight);
@@ -145,7 +133,7 @@ namespace StandardRepository.Helpers
                 try
                 {
                     var memberExpressionLeft = (MemberExpression)body.Left;
-                    var fieldName = GetFieldNameFromPropertyName(memberExpressionLeft.Member.Name, memberExpressionLeft.Expression.Type.Name, false);
+                    var fieldName = GetFieldNameFromPropertyName(memberExpressionLeft.Member.Name, memberExpressionLeft.Expression.Type.Name);
                     var lambdaExpressionLeft = Expression.Lambda(memberExpressionLeft);
                     var valueLeft = lambdaExpressionLeft.Compile().DynamicInvoke();
                     leftPart = AddToParameters(parameters, fieldName, memberExpressionLeft.Type, valueLeft);
@@ -168,7 +156,7 @@ namespace StandardRepository.Helpers
 
                     if (methodCallExpression.Object is MemberExpression memberAccess)
                     {
-                        var fieldName = GetFieldNameFromPropertyName(memberAccess.Member.Name, memberAccess.Member.DeclaringType.Name, false);
+                        var fieldName = GetFieldNameFromPropertyName(memberAccess.Member.Name, memberAccess.Member.DeclaringType.Name);
                         var prmName = AddToParameters(parameters, fieldName, typeof(string), value);
 
                         return $"LOWER({fieldName}) LIKE '%' || {prmName} || '%'";
@@ -180,7 +168,7 @@ namespace StandardRepository.Helpers
             {
                 var value = constantExpression.Value;
 
-                var prmName = AddToParameters(parameters, Guid.NewGuid().ToString("N"), constantExpression.Type, value);
+                var prmName = AddToParameters(parameters, "constant", constantExpression.Type, value);
                 return prmName;
             }
 
@@ -209,9 +197,7 @@ namespace StandardRepository.Helpers
 
             if (expression is MemberExpression member)
             {
-                var isChildProperty = member.Expression.Type != member.Member.DeclaringType
-                                      && typeof(BaseEntity) != member.Member.DeclaringType;
-                return GetFieldNameFromPropertyName(member.Member.Name, member.Expression.Type.Name, isChildProperty);
+                return GetFieldNameFromPropertyName(member.Member.Name, member.Expression.Type.Name);
             }
 
             return string.Empty;

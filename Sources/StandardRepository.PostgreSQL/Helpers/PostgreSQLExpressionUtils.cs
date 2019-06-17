@@ -17,10 +17,5 @@ namespace StandardRepository.PostgreSQL.Helpers
         {
             return _typeLookup.GetDbType(type);
         }
-
-        public override string GetFieldNameFromPropertyName(string propertyName, string entityTypeName, bool isRelatedEntityProperty)
-        {
-            return propertyName.GetFieldNameFromPropertyName(entityTypeName, isRelatedEntityProperty);
-        }
     }
 }

@@ -10,7 +10,6 @@ using Npgsql;
 using StandardRepository.DbGenerator;
 using StandardRepository.Helpers;
 using StandardRepository.Models;
-using StandardRepository.Models.Entities;
 using StandardRepository.PostgreSQL.Helpers;
 using StandardRepository.PostgreSQL.Helpers.SqlExecutor;
 
@@ -232,9 +231,9 @@ namespace StandardRepository.PostgreSQL.DbGenerator
 
             var script = template.Replace(FULL_TABLE_NAME, model.TableFullName)
                                  .Replace(TABLE_NAME, model.TableName)
-                                 .Replace(SELF_FIELDS_WITH_PREFIX_AND_TYPE, GetFieldPartOfQuery(entityType, true, false, true, true, "prm_", false))
-                                 .Replace(ALL_FIELDS_EXCEPT_ID, GetFieldPartOfQuery(entityType, false, false, false, false, "", false))
-                                 .Replace(SELF_FIELDS_WITH_PREFIX, GetFieldPartOfQuery(entityType, true, false, false, true, "prm_", false));
+                                 .Replace(SELF_FIELDS_WITH_PREFIX_AND_TYPE, GetFieldPartOfQuery(entityType, true, false, true,  "prm_", false))
+                                 .Replace(ALL_FIELDS_EXCEPT_ID, GetFieldPartOfQuery(entityType, false, false, false,  "", false))
+                                 .Replace(SELF_FIELDS_WITH_PREFIX, GetFieldPartOfQuery(entityType, true, false, false,  "prm_", false));
             return script;
         }
 
@@ -246,7 +245,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
 
             var script = template.Replace(FULL_TABLE_NAME, model.TableFullName)
                                  .Replace(TABLE_NAME, model.TableName)
-                                 .Replace(SELF_FIELDS_WITH_PREFIX_AND_TYPE, GetFieldPartOfQuery(entityType, true, false, true, true, "prm_", false))
+                                 .Replace(SELF_FIELDS_WITH_PREFIX_AND_TYPE, GetFieldPartOfQuery(entityType, true, false, true,  "prm_", false))
                                  .Replace(SELF_FIELDS_FOR_UPDATE, GetFieldPartOfQueryForUpdate(entityType, "prm_"))
                                  .Replace(RELATED_NAME_UPDATES, GetRelatedNameUpdateQueries(entityType, model));
             return script;
@@ -261,7 +260,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
             var script = template.Replace(FULL_TABLE_NAME, model.TableFullName)
                                  .Replace(TABLE_NAME, model.TableName)
                                  .Replace(ALL_FIELDS_WITH_TYPE, GetFieldPartOfQuery(entityType, false, false, true))
-                                 .Replace(ALL_FIELDS_WITH_PREFIX, GetFieldPartOfQuery(entityType, false, false, false, true, "t."));
+                                 .Replace(ALL_FIELDS_WITH_PREFIX, GetFieldPartOfQuery(entityType, false, false, false,  "t."));
             return script;
         }
 
@@ -307,7 +306,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
             var script = template.Replace(FULL_TABLE_NAME, model.TableFullName)
                                  .Replace(TABLE_NAME, model.TableName)
                                  .Replace(ALL_FIELDS_INCLUDING_REVISION_FIELDS_WITH_TYPE, GetFieldPartOfQuery(entityType, false, true, true))
-                                 .Replace(ALL_FIELDS_INCLUDING_REVISION_FIELDS_WITH_PREFIX, GetFieldPartOfQuery(entityType, false, true, false, true, "t."));
+                                 .Replace(ALL_FIELDS_INCLUDING_REVISION_FIELDS_WITH_PREFIX, GetFieldPartOfQuery(entityType, false, true, false, "t."));
             return script;
         }
 
@@ -320,7 +319,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
             var script = template.Replace(FULL_TABLE_NAME, model.TableFullName)
                                  .Replace(TABLE_NAME, model.TableName)
                                  .Replace(ALL_FIELDS_INCLUDING_REVISION_FIELDS, GetFieldPartOfQuery(entityType))
-                                 .Replace(ALL_FIELDS_WITH_PREFIX, GetFieldPartOfQuery(entityType, false, false, false, true, "t."));
+                                 .Replace(ALL_FIELDS_WITH_PREFIX, GetFieldPartOfQuery(entityType, false, false, false,  "t."));
             return script;
         }
 
@@ -333,7 +332,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
             var script = template.Replace(FULL_TABLE_NAME, model.TableFullName)
                                  .Replace(TABLE_NAME, model.TableName)
                                  .Replace(SELF_FIELDS_FOR_UPDATE, GetFieldPartOfQueryForUpdate(entityType, "rev."))
-                                 .Replace(SELF_FIELDS_WITH_PREFIX, GetFieldPartOfQuery(entityType, true, false, false, true, "r.", false))
+                                 .Replace(SELF_FIELDS_WITH_PREFIX, GetFieldPartOfQuery(entityType, true, false, false,  "r.", false))
                                  .Replace(RELATED_NAME_UPDATES_FOR_RESTORE, GetRelatedNameUpdateQueriesForRestore(entityType, model));
             return script;
         }
@@ -355,7 +354,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
         }
 
         public string GetFieldPartOfQuery(Type entityType, bool isSelfFieldsOnly = false, bool isWithRevisionFields = true,
-                                          bool isWithTypes = false, bool isWithPrefix = false, string prefix = "", bool isIncludingId = true)
+                                          bool isWithTypes = false, string prefix = "", bool isIncludingId = true)
         {
             var sb = new StringBuilder();
             var baseName = entityType.Name.GetDelimitedName();
@@ -388,7 +387,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
                     sb.Append($",{newLine}");
                 }
 
-                sb.Append($"{space}{prefix}name");
+                sb.Append($"{space}{prefix}{baseName}_name");
                 if (isWithTypes)
                 {
                     sb.Append($" text,{newLine}");
@@ -527,13 +526,20 @@ namespace StandardRepository.PostgreSQL.DbGenerator
             }
 
             sb.Append($"    {tableName}_uid uuid not null,{Environment.NewLine}");
+            sb.Append($"    {tableName}_name text not null,{Environment.NewLine}");
 
             var fields = _entityUtils.GetAllProperties(entityType);
             for (var i = 0; i < fields.Length; i++)
             {
                 var field = fields[i];
+                if (field.PropertyType.IsArray)
+                {
+                    continue;
+                }
+
                 if (field.Name == "Id"
-                    || field.Name == "Uid")
+                    || field.Name == "Uid"
+                    || field.Name == "Name")
                 {
                     continue;
                 }
@@ -547,22 +553,13 @@ namespace StandardRepository.PostgreSQL.DbGenerator
                 var fieldName = _entityUtils.GetFieldNameFromPropertyName(field.Name);
                 var notNullText = GetNotNullStringIfFieldNullable(field);
 
-                if (field.PropertyType.BaseType == typeof(BaseEntity))
+                if (field.Name == "IP")
                 {
-                    sb.Append($"    {fieldName}_id bigint{notNullText},{Environment.NewLine}");
-                    sb.Append($"    {fieldName}_uid uuid{notNullText},{Environment.NewLine}");
-                    sb.Append($"    {fieldName}_name text{notNullText},{Environment.NewLine}");
+                    sb.Append($"    {fieldName} inet{notNullText},{Environment.NewLine}");
                 }
-                else if (!field.PropertyType.IsArray)
+                else
                 {
-                    if (field.Name == "IP")
-                    {
-                        sb.Append($"    {fieldName} inet{notNullText},{Environment.NewLine}");
-                    }
-                    else
-                    {
-                        sb.Append($"    {fieldName} {GetFieldTypeString(field)}{notNullText},{Environment.NewLine}");
-                    }
+                    sb.Append($"    {fieldName} {GetFieldTypeString(field)}{notNullText},{Environment.NewLine}");
                 }
             }
 

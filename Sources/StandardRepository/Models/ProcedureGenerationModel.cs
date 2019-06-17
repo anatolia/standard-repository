@@ -12,10 +12,10 @@ namespace StandardRepository.Models
         public string IdFieldName { get; }
         public string IdParameterName { get; }
 
-        public ProcedureGenerationModel(Type entityType, Func<Type, string> getSchemaName, Func<string, string, bool, string> getNameForDb)
+        public ProcedureGenerationModel(Type entityType, Func<Type, string> getSchemaName, Func<string, string, string> getNameForDb)
         {
             SchemaName = getSchemaName(entityType);
-            TableName = getNameForDb(entityType.Name, null, false);
+            TableName = getNameForDb(entityType.Name, null);
             RevisionTableName = $"{TableName}_revision";
             TableFullName = $"{SchemaName}.{TableName}";
             RevisionTableFullName = $"{SchemaName}.{RevisionTableName}";
