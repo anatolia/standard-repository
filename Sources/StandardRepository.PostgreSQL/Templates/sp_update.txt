@@ -13,7 +13,7 @@ BEGIN
     UPDATE ##FULL_TABLE_NAME##
     SET updated_by = prm_updated_by,
         updated_at = now(),
-        name = prm_name,        
+        ##TABLE_NAME##_name = prm_name,        
 ##SELF_FIELDS_FOR_UPDATE##
     WHERE ##TABLE_NAME##_id = prm_##TABLE_NAME##_id;
 	

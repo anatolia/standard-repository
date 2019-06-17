@@ -22,9 +22,9 @@ BEGIN
     UPDATE ##FULL_TABLE_NAME##
     SET updated_by = prm_updated_by,
         updated_at = now(),
-        name = rev.name,        
+        ##TABLE_NAME##_name = rev.##TABLE_NAME##_name,        
 ##SELF_FIELDS_FOR_UPDATE##
-	FROM (SELECT  r.##TABLE_NAME##_uid,r.name,##SELF_FIELDS_WITH_PREFIX##,r.updated_by
+	FROM (SELECT  r.##TABLE_NAME##_uid,r.##TABLE_NAME##_name,##SELF_FIELDS_WITH_PREFIX##,r.updated_by
           FROM ##FULL_TABLE_NAME##_revision r
           WHERE r.##TABLE_NAME##_id = prm_##TABLE_NAME##_id AND r.revision = prm_revision
           ) AS rev
