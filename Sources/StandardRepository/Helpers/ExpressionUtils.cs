@@ -156,7 +156,7 @@ namespace StandardRepository.Helpers
 
                     if (methodCallExpression.Object is MemberExpression memberAccess)
                     {
-                        var fieldName = GetFieldNameFromPropertyName(memberAccess.Member.Name, memberAccess.Member.DeclaringType.Name);
+                        var fieldName = GetFieldNameFromPropertyName(memberAccess.Member.Name, memberAccess.Expression.Type.Name);
                         var prmName = AddToParameters(parameters, fieldName, typeof(string), value);
 
                         return $"LOWER({fieldName}) LIKE '%' || {prmName} || '%'";

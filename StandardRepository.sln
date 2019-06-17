@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StandardRepository.Tests", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StandardRepository.PostgreSQL", "Sources\StandardRepository.PostgreSQL\StandardRepository.PostgreSQL.csproj", "{D768CDA4-B46A-48C9-A61A-94D71CDA8C72}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardRepository.PostgreSQL.Tests", "Tests\StandardRepository.PostgreSQL.Tests\StandardRepository.PostgreSQL.Tests.csproj", "{7B7954B5-2B86-4FD9-B133-C41F079DB349}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StandardRepository.PostgreSQL.Tests", "Tests\StandardRepository.PostgreSQL.Tests\StandardRepository.PostgreSQL.Tests.csproj", "{7B7954B5-2B86-4FD9-B133-C41F079DB349}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

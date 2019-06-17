@@ -436,6 +436,22 @@ namespace StandardRepository.PostgreSQL.Tests
         }
 
         [Test]
+        public void ExpressionUtils_GetConditions_Name_Contains()
+        {
+            Expression<Func<Organization, bool>> expression = x => x.Name.Contains("test") || x.Description.Contains("other test");
+
+            var parameters = new Dictionary<string, DbParameterInfo>();
+            var filter = SystemUnderTest.GetConditions(expression.Body, parameters);
+
+            filter.ShouldBe("(LOWER(organization_name) LIKE '%' || :varprm_organization_name || '%') OR (LOWER(description) LIKE '%' || :varprm_description || '%')");
+            parameters.Count.ShouldBe(2);
+            parameters.Keys.ShouldContain(":varprm_description");
+            parameters.Keys.ShouldContain(":varprm_organization_name");
+            parameters.Values.Select(x => x.Value).ShouldContain("test");
+            parameters.Values.Select(x => x.Value).ShouldContain("other test");
+        }
+
+        [Test]
         public void ExpressionUtils_GetConditions_Constant()
         {
             Expression<Func<Project, bool>> expression = x => 5 > 6;
