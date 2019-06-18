@@ -18,4 +18,12 @@ and also soft delete logic.
 ## You can install this package via NuGet
     Install-Package StandardRepository.PostgreSQL
     
+## Example Project
+
+please check the "translation" project for an example usage.
+
+https://github.com/anatolia/translation/blob/master/Source/Translation.Client.Web/Helpers/DbGeneratorHelper.cs#L47
+https://github.com/anatolia/translation/blob/master/Source/Translation.Data/Repositories/OrganizationRepository.cs#L13
+https://github.com/anatolia/translation/blob/master/Source/Translation.Data/UnitOfWorks/LogOnUnitOfWork.cs#L28
+    
 
