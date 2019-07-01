@@ -57,7 +57,6 @@
 
   <ItemGroup>
     <PackageReference Include="Npgsql" Version="4.0.7" />
-    <PackageReference Include="StandardRepository" Version="1.0.1.4" />
   </ItemGroup>
 
   <ItemGroup>
@@ -65,5 +64,9 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\StandardRepository\StandardRepository.csproj" />
   </ItemGroup>
 </Project>

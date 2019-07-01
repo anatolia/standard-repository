@@ -14,5 +14,7 @@ namespace StandardRepository.PostgreSQL.Tests.Base.Entities
 
         public int ProjectCount { get; set; }
         public DateTime StartDate { get; set; }
+
+        public long LongField { get; set; }
     }
 }
