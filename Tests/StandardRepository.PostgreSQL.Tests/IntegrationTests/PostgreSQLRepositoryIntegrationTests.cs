@@ -422,8 +422,9 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
             result.ShouldNotBeNull();
             result.Count.ShouldBe(theCount - filter);
 
-            foreach (var id in result)
+            for (var i = 0; i < result.Count; i++)
             {
+                var id = result[i];
                 id.ShouldBeLessThan(theCount + 1);
                 id.ShouldBeGreaterThan(filter);
             }
@@ -451,8 +452,9 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
             items.ShouldNotBeNull();
             items.Count.ShouldBe(5);
 
-            foreach (var item in items)
+            for (var i = 0; i < items.Count; i++)
             {
+                var item = items[i];
                 item.Id.ShouldBeLessThan(theCount + 1);
                 item.Id.ShouldBeGreaterThan(lastId);
             }
@@ -480,8 +482,9 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
             items.ShouldNotBeNull();
             items.Count.ShouldBe(2);
 
-            foreach (var item in items)
+            for (var i = 0; i < items.Count; i++)
             {
+                var item = items[i];
                 item.Id.ShouldBeLessThan(theCount + 1);
                 item.Id.ShouldBeGreaterThan(lastId);
             }
@@ -508,8 +511,9 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
             items.ShouldNotBeNull();
             items.Count.ShouldBe(7);
 
-            foreach (var item in items)
+            for (var i = 0; i < items.Count; i++)
             {
+                var item = items[i];
                 item.Id.ShouldBeLessThan(theCount + 1);
                 item.Id.ShouldBeGreaterThan(filter);
             }
@@ -536,8 +540,9 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
             items.ShouldNotBeNull();
             items.Count.ShouldBe(2);
 
-            foreach (var item in items)
+            for (var i = 0; i < items.Count; i++)
             {
+                var item = items[i];
                 item.Id.ShouldBeLessThan(theCount + 1);
                 item.Id.ShouldBeGreaterThan(5);
             }
@@ -580,7 +585,7 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
 
             var entities = new Dictionary<int, Organization>();
             entities.Add(1, entity);
-            
+
             var theCount = 5;
             for (var i = 0; i < theCount; i++)
             {
@@ -598,8 +603,9 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
             revisions.Count.ShouldBe(theCount);
 
             var revisionNumber = 1;
-            foreach (var entityRevision in revisions)
+            for (var i = 0; i < revisions.Count; i++)
             {
+                var entityRevision = revisions[i];
                 entityRevision.Revision.ShouldBe(revisionNumber);
                 revisionNumber++;
 
@@ -628,6 +634,57 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
                     AssertUpdateFieldsNull(updatedEntity);
                 }
             }
+        }
+
+        [Test]
+        public async Task Repository_Revision()
+        {
+            // arrange
+            var repository = GetOrganizationRepository();
+
+            var entity = GetOrganization();
+            var id = await repository.Insert(CURRENT_USER_ID, entity);
+            entity.Id = id;
+
+            var entities = new Dictionary<int, Organization>();
+            entities.Add(1, entity);
+
+            var theCount = 5;
+            var theRevision = 3;
+            for (var i = 0; i < theCount; i++)
+            {
+                var updatingEntity = GetOrganization(entity);
+                updatingEntity.Description = "test description " + Guid.NewGuid();
+                await repository.Update(CURRENT_USER_ID, updatingEntity);
+                entities.Add(i + 2, updatingEntity);
+            }
+
+            var oldRevisions = await repository.SelectRevisions(id);
+
+            // act
+            var result = await repository.RestoreRevision(CURRENT_USER_ID, id, theRevision);
+
+            // assert
+            result.ShouldBeTrue();
+
+            var revisions = await repository.SelectRevisions(id);
+            revisions.Count.ShouldBe(oldRevisions.Count + 1);
+
+            var revisionEntity = revisions.FirstOrDefault(x => x.Revision == theRevision);
+            revisionEntity.ShouldNotBeNull();
+
+            var restoredEntity = await repository.SelectById(id);
+
+            revisionEntity.Entity.Name.ShouldBe(restoredEntity.Name);
+            revisionEntity.Entity.Email.ShouldBe(restoredEntity.Email);
+            revisionEntity.Entity.IsActive.ShouldBe(restoredEntity.IsActive);
+            revisionEntity.Entity.ProjectCount.ShouldBe(restoredEntity.ProjectCount);
+            revisionEntity.Entity.Description.ShouldBe(restoredEntity.Description);
+            revisionEntity.Entity.IsSuperOrganization.ShouldBe(restoredEntity.IsSuperOrganization);
+
+            AssertCreated(restoredEntity);
+            AssertUpdated(restoredEntity);
+            AssertDeleteFieldsNull(restoredEntity);
         }
 
         [Test]

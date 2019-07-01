@@ -105,8 +105,9 @@ namespace StandardRepository.Helpers
         {
             var entityTypes = new List<Type>();
 
-            foreach (var assembly in AssembliesForEntities)
+            for (var i = 0; i < AssembliesForEntities.Length; i++)
             {
+                var assembly = AssembliesForEntities[i];
                 var types = assembly.GetTypes();
                 var entities = types.Where(x => x.BaseType == typeof(BaseEntity)
                                                 || x.BaseType?.BaseType == typeof(BaseEntity));
@@ -115,16 +116,18 @@ namespace StandardRepository.Helpers
             }
 
             var removeList = new List<Type>();
-            foreach (var entityType in entityTypes)
+            for (var i = 0; i < entityTypes.Count; i++)
             {
+                var entityType = entityTypes[i];
                 if (entityTypes.Any(x => x.BaseType == entityType))
                 {
                     removeList.Add(entityType);
                 }
             }
 
-            foreach (var type in removeList)
+            for (var i = 0; i < removeList.Count; i++)
             {
+                var type = removeList[i];
                 entityTypes.Remove(type);
             }
 

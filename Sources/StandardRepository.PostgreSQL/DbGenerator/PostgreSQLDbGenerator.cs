@@ -32,8 +32,9 @@ namespace StandardRepository.PostgreSQL.DbGenerator
         public override List<string> GenerateSchemas()
         {
             var schemas = _entityTypes.Select(x => _entityUtils.GetSchemaName(x)).Distinct().ToList();
-            foreach (var schema in schemas)
+            for (var i = 0; i < schemas.Count; i++)
             {
+                var schema = schemas[i];
                 _sqlExecutor.ExecuteSql($"CREATE SCHEMA IF NOT EXISTS {schema};").Wait();
             }
 
@@ -44,8 +45,9 @@ namespace StandardRepository.PostgreSQL.DbGenerator
         {
             var result = new List<string>();
 
-            foreach (var entityType in _entityTypes)
+            for (var i = 0; i < _entityTypes.Count; i++)
             {
+                var entityType = _entityTypes[i];
                 var tableFullName = _entityUtils.GetTableFullName(entityType);
                 result.Add(tableFullName);
 
@@ -84,72 +86,81 @@ namespace StandardRepository.PostgreSQL.DbGenerator
         #region Stored Procedure and Function Generators
         protected override void PrepareInsertProcedures()
         {
-            foreach (var entityType in _entityTypes)
+            for (var i = 0; i < _entityTypes.Count; i++)
             {
+                var entityType = _entityTypes[i];
                 PrepareStoredProcedure(entityType, SQLConstants.PROCEDURE_INSERT_POSTFIX, GetInsertStoredProcedureSql);
             }
         }
 
         protected override void PrepareUpdateProcedures()
         {
-            foreach (var entityType in _entityTypes)
+            for (var i = 0; i < _entityTypes.Count; i++)
             {
+                var entityType = _entityTypes[i];
                 PrepareStoredProcedure(entityType, SQLConstants.PROCEDURE_UPDATE_POSTFIX, GetUpdateStoredProcedureSql);
             }
         }
 
         protected override void PrepareDeleteProcedures()
         {
-            foreach (var entityType in _entityTypes)
+            for (var i = 0; i < _entityTypes.Count; i++)
             {
+                var entityType = _entityTypes[i];
                 PrepareStoredProcedure(entityType, SQLConstants.PROCEDURE_DELETE_POSTFIX, GetDeleteStoredProcedureSql);
             }
         }
 
         protected override void PrepareUndoDeleteProcedures()
         {
-            foreach (var entityType in _entityTypes)
+            for (var i = 0; i < _entityTypes.Count; i++)
             {
+                var entityType = _entityTypes[i];
                 PrepareStoredProcedure(entityType, SQLConstants.PROCEDURE_UNDO_DELETE_POSTFIX, GetUndoDeleteStoredProcedureSql);
             }
         }
 
         protected override void PrepareHardDeleteProcedures()
         {
-            foreach (var entityType in _entityTypes)
+            for (var i = 0; i < _entityTypes.Count; i++)
             {
+                var entityType = _entityTypes[i];
                 PrepareStoredProcedure(entityType, SQLConstants.PROCEDURE_HARD_DELETE_POSTFIX, GetHardDeleteStoredProcedureSql);
             }
         }
 
         protected override void PrepareSelectByIdProcedures()
         {
-            foreach (var entityType in _entityTypes)
+            for (var i = 0; i < _entityTypes.Count; i++)
             {
+                var entityType = _entityTypes[i];
                 PrepareStoredProcedure(entityType, SQLConstants.PROCEDURE_SELECT_BY_ID_POSTFIX, GetSelectByIdStoredProcedureSql);
             }
         }
 
         protected override void PrepareRevisionsProcedures()
         {
-            foreach (var entityType in _entityTypes)
+            for (var i = 0; i < _entityTypes.Count; i++)
             {
+                var entityType = _entityTypes[i];
                 PrepareStoredProcedure(entityType, SQLConstants.PROCEDURE_SELECT_REVISIONS_POSTFIX, GetSelectRevisionsStoredProcedureSql);
             }
         }
 
         protected override void PrepareSaveRevisionProcedures()
         {
-            foreach (var entityType in _entityTypes)
+            for (var i = 0; i < _entityTypes.Count; i++)
             {
+                var entityType = _entityTypes[i];
                 PrepareStoredProcedure(entityType, SQLConstants.PROCEDURE_SAVE_REVISION_POSTFIX, GetSaveRevisionStoredProcedureSql);
             }
         }
 
         protected override void PrepareRestoreRevisionProcedures()
         {
-            foreach (var entityType in _entityTypes)
+            for (var i = 0; i < _entityTypes.Count; i++)
             {
+                var entityType = _entityTypes[i];
                 PrepareStoredProcedure(entityType, SQLConstants.PROCEDURE_RESTORE_REVISION_POSTFIX, GetRestoreRevisionStoredProcedureSql);
             }
         }
@@ -196,8 +207,9 @@ namespace StandardRepository.PostgreSQL.DbGenerator
             var sb = new StringBuilder();
             var relatedTypes = _entityUtils.GetRelatedEntityTypes(entityType);
             var tableName = _entityUtils.GetTableName(entityType);
-            foreach (var relatedType in relatedTypes)
+            for (var i = 0; i < relatedTypes.Count; i++)
             {
+                var relatedType = relatedTypes[i];
                 var schemaName = _entityUtils.GetSchemaName(relatedType);
                 var delimitedName = relatedType.Name.GetDelimitedName();
 
@@ -216,13 +228,14 @@ namespace StandardRepository.PostgreSQL.DbGenerator
             var baseTableName = _entityUtils.GetTableName(entityType);
 
             var relatedTypes = _entityUtils.GetRelatedEntityTypes(entityType);
-            foreach (var relatedType in relatedTypes)
+            for (var i = 0; i < relatedTypes.Count; i++)
             {
+                var relatedType = relatedTypes[i];
                 var schemaName = _entityUtils.GetSchemaName(relatedType);
                 var delimitedName = relatedType.Name.GetDelimitedName();
 
                 sb.Append($"    {SQLConstants.UPDATE} {schemaName}.{delimitedName}{Environment.NewLine}");
-                sb.Append($"    {SQLConstants.SET} name = (SELECT bt.name FROM {baseTableSchema}.{baseTableName} bt WHERE bt.{baseTableName}_id = {SQLConstants.PARAMETER_PREFIX}{baseTableName}_id){Environment.NewLine}");
+                sb.Append($"    {SQLConstants.SET} {baseTableName}_name = (SELECT bt.{baseTableName}_name FROM {baseTableSchema}.{baseTableName} bt WHERE bt.{baseTableName}_id = {SQLConstants.PARAMETER_PREFIX}{baseTableName}_id){Environment.NewLine}");
                 sb.Append($"    {SQLConstants.WHERE} {model.IdFieldName} = {model.IdParameterName};{Environment.NewLine}{Environment.NewLine}");
             }
 
@@ -468,7 +481,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
                 sb.Append($"{space}{prefix}revisioned_at");
                 if (isWithTypes)
                 {
-                    sb.Append($" timestamp,");
+                    sb.Append(" timestamp,");
                 }
                 else
                 {
@@ -481,7 +494,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
 
             if (sb.ToString().EndsWith(Environment.NewLine))
             {
-                sb.Remove(sb.ToString().LastIndexOf(Environment.NewLine, StringComparison.Ordinal), 2);
+                sb.Remove(sb.ToString().LastIndexOf(Environment.NewLine, StringComparison.Ordinal), Environment.NewLine == "\r\n" ? 2 : 1);
             }
 
             return sb.ToString();
@@ -515,7 +528,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
 
             if (sb.ToString().EndsWith(Environment.NewLine))
             {
-                sb.Remove(sb.ToString().LastIndexOf(Environment.NewLine, StringComparison.Ordinal), 2);
+                sb.Remove(sb.ToString().LastIndexOf(Environment.NewLine, StringComparison.Ordinal), Environment.NewLine == "\r\n" ? 2 : 1);
             }
 
             return sb.ToString();
@@ -586,7 +599,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
 
             if (sb.ToString().EndsWith(Environment.NewLine))
             {
-                sb.Remove(sb.ToString().LastIndexOf(Environment.NewLine, StringComparison.Ordinal), 2);
+                sb.Remove(sb.ToString().LastIndexOf(Environment.NewLine, StringComparison.Ordinal), Environment.NewLine == "\r\n" ? 2 : 1);
             }
 
             return sb;

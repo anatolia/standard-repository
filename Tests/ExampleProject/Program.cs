@@ -58,8 +58,9 @@ namespace ExampleProject
 
             Console.WriteLine("Project revisions;");
             var projectRevisions = projectRepository.SelectRevisions(projectId).Result;
-            foreach (var projectRevision in projectRevisions)
+            for (var i = 0; i < projectRevisions.Count; i++)
             {
+                var projectRevision = projectRevisions[i];
                 Console.WriteLine(projectRevision.Revision + " - " + projectRevision.Entity.Name);
             }
 

@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Npgsql;
 using NpgsqlTypes;
 
-using StandardRepository.Factories;
 using StandardRepository.Helpers;
 using StandardRepository.Models;
 using StandardRepository.Models.Entities;
@@ -23,10 +22,12 @@ namespace StandardRepository.PostgreSQL
                                                                                                                                            expressionUtils, sqlExecutor, updateableFields)
         {
             var sb = new StringBuilder();
-            foreach (var field in Fields)
+            for (var i = 0; i < Fields.Length; i++)
             {
+                var field = Fields[i];
                 sb.Append($"{PostgreSQLConstants.PARAMETER_PRESIGN}{SQLConstants.PARAMETER_PREFIX}{field.Name.GetDelimitedName()},");
             }
+
             var lastComma = sb.ToString().LastIndexOf(',');
             sb.Remove(lastComma, 1);
 
