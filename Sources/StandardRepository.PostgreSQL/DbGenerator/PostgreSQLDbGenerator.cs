@@ -505,7 +505,12 @@ namespace StandardRepository.PostgreSQL.DbGenerator
             }
 
             var lastComma = sb.ToString().LastIndexOf(',');
-            sb.Remove(lastComma, 3);
+            sb.Remove(lastComma, 1);
+
+            if (sb.ToString().EndsWith(Environment.NewLine))
+            {
+                sb.Remove(sb.ToString().LastIndexOf(Environment.NewLine, StringComparison.Ordinal), 2);
+            }
 
             return sb.ToString();
         }
@@ -572,6 +577,11 @@ namespace StandardRepository.PostgreSQL.DbGenerator
 
             var lastComma = sb.ToString().LastIndexOf(',');
             sb.Remove(lastComma, 1);
+
+            if (sb.ToString().EndsWith(Environment.NewLine))
+            {
+                sb.Remove(sb.ToString().LastIndexOf(Environment.NewLine, StringComparison.Ordinal), 2);
+            }
 
             return sb;
         }
