@@ -81,12 +81,6 @@ namespace StandardRepository.Helpers
             return baseFields;
         }
 
-        public PropertyInfo[] GetBasePropertiesExceptId()
-        {
-            var baseFields = GetBaseProperties().Where(x => x.Name != "Id").ToArray();
-            return baseFields;
-        }
-
         public List<Type> GetRelatedEntityTypes(Type entityType)
         {
             var entityTypes = new List<Type>();
