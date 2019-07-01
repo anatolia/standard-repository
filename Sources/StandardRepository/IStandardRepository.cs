@@ -16,10 +16,10 @@ namespace StandardRepository
         /// <summary>
         /// When you want to run a group of repositories in one transaction (in unit of works),
         /// you need to set the same transaction for SQL executor
-        /// and to do that you need to pass connection factory at the beginning of the scope.
+        /// and to do that you need to pass connection at the beginning of the scope.
         /// </summary>
-        /// <param name="connectionFactory"></param>
-        void SetSqlExecutorForTransaction(IConnectionFactory<TConnection> connectionFactory);
+        /// <param name="connection"></param>
+        void SetSqlExecutorForTransaction(TConnection connection);
 
         Task<long> Insert(long currentUserId, T entity);
 

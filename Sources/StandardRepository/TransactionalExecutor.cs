@@ -1,8 +1,7 @@
 ﻿using System;
+using System.Data;
 using System.Data.Common;
 using System.Threading.Tasks;
-
-using StandardRepository.Factories;
 
 namespace StandardRepository
 {
@@ -10,24 +9,26 @@ namespace StandardRepository
     where TConnection : DbConnection, new()
     where TTransaction : DbTransaction
     {
-        private readonly IConnectionFactory<TConnection> _connectionFactory;
+        private readonly TConnection _connection;
 
-        public TransactionalExecutor(IConnectionFactory<TConnection> connectionFactory)
+        public TransactionalExecutor(TConnection connection)
         {
-            _connectionFactory = connectionFactory;
+            _connection = connection;
         }
 
-        public async Task<TResult> ExecuteAsync<TResult>(Func<IConnectionFactory<TConnection>, Task<TResult>> func)
+        public async Task<TResult> ExecuteAsync<TResult>(Func<TConnection, Task<TResult>> func)
         {
-            using (var connection = _connectionFactory.Create())
+            if (_connection.State == ConnectionState.Closed)
             {
-                using (var transaction = (TTransaction)connection.BeginTransaction())
-                {
-                    var result = await func(_connectionFactory);
+                await _connection.OpenAsync();
+            }
 
-                    transaction.Commit();
-                    return result;
-                }
+            using (var transaction = (TTransaction)_connection.BeginTransaction())
+            {
+                var result = await func(_connection);
+                transaction.Commit();
+
+                return result;
             }
         }
     }

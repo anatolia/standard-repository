@@ -85,13 +85,33 @@ namespace StandardRepository.Helpers.SqlExecutor
             await command.ExecuteNonQueryAsync();
         }
 
-        protected async Task ExecuteSqlWithOpenConnection(TCommand command, string sql)
+        protected async Task ExecuteSql(TCommand command, string sql, List<TParameter> parameters)
         {
             command.CommandText = sql;
+
+            if (parameters != null)
+            {
+                for (var i = 0; i < parameters.Count; i++)
+                {
+                    var parameter = parameters[i];
+                    command.Parameters.Add(parameter);
+                }
+            }
+
             await command.ExecuteNonQueryAsync();
         }
 
-        protected async Task<T> ExecuteStoredProcedureReturningValue<T>(TCommand command, string storedProcedureName, IEnumerable<TParameter> parameters = null)
+        protected async Task ExecuteStoredProcedure(TCommand command, string storedProcedureName, List<TParameter> parameters)
+        {
+            command.CommandType = CommandType.StoredProcedure;
+            command.CommandText = storedProcedureName;
+
+            AddParametersRange(command, parameters);
+
+            await command.ExecuteNonQueryAsync();
+        }
+
+        protected async Task<T> ExecuteStoredProcedureReturningValue<T>(TCommand command, string storedProcedureName, IEnumerable<TParameter> parameters)
         {
             command.CommandType = CommandType.StoredProcedure;
             command.CommandText = storedProcedureName;
@@ -99,27 +119,16 @@ namespace StandardRepository.Helpers.SqlExecutor
             AddParametersRange(command, parameters);
 
             var result = await command.ExecuteScalarAsync();
-
             if (result == null)
             {
                 throw new DataException($"{storedProcedureName} did not return value!");
             }
 
-            var id = (T)result;
-            return id;
+            var value = (T)result;
+            return value;
         }
-
-        protected async Task ExecuteStoredProcedure(TCommand command, string storedProcedureName, List<TParameter> parameters = null)
-        {
-            command.CommandType = CommandType.StoredProcedure;
-            command.CommandText = storedProcedureName;
-
-            AddParametersRange(command, parameters);
-
-            await command.ExecuteNonQueryAsync();
-        }
-
-        protected async Task<T> ExecuteStoredProcedureReturningEntity<T>(TCommand command, string storedProcedureName, List<TParameter> parameters = null) where T : new()
+        
+        protected async Task<T> ExecuteStoredProcedureReturningEntity<T>(TCommand command, string storedProcedureName, List<TParameter> parameters) where T : new()
         {
             var entity = new T();
             var properties = entity.GetType().GetProperties();
@@ -144,29 +153,13 @@ namespace StandardRepository.Helpers.SqlExecutor
             return entity;
         }
 
-        protected async Task ExecuteSql(TCommand command, string sql, List<TParameter> parameters = null)
-        {
-            command.CommandText = sql;
-
-            if (parameters != null)
-            {
-                for (var i = 0; i < parameters.Count; i++)
-                {
-                    var parameter = parameters[i];
-                    command.Parameters.Add(parameter);
-                }
-            }
-
-            await command.ExecuteNonQueryAsync();
-        }
-
-        protected async Task<T> ExecuteSqlReturningValue<T>(TCommand command, string sql, List<TParameter> parameters = null)
+        protected async Task<T> ExecuteSqlReturningValue<T>(TCommand command, string sql, List<TParameter> parameters)
         {
             command.CommandText = sql;
             command.Parameters.AddRange((parameters ?? Enumerable.Empty<TParameter>()).ToArray());
 
-            var response = await command.ExecuteScalarAsync();
-            if (response == null)
+            var result = await command.ExecuteScalarAsync();
+            if (result == null)
             {
                 if (typeof(T) == typeof(bool))
                 {
@@ -176,11 +169,44 @@ namespace StandardRepository.Helpers.SqlExecutor
                 throw new DataException("query did not return value!");
             }
 
-            var result = (T)Convert.ChangeType(response, typeof(T));
-            return result;
+            var value = (T)Convert.ChangeType(result, typeof(T));
+            return value;
         }
 
-        protected async Task<T> ExecuteSqlReturningEntity<T>(TCommand command, string sql, List<TParameter> parameters = null) where T : new()
+        protected async Task<List<T>> ExecuteSqlReturningList<T>(TCommand command, string sql, List<TParameter> parameters)
+        {
+            var items = new List<T>();
+
+            command.CommandText = sql;
+
+            if (parameters != null)
+            {
+                for (var i = 0; i < parameters.Count; i++)
+                {
+                    var parameter = parameters[i];
+                    command.Parameters.Add(parameter);
+                }
+            }
+
+            command.Prepare();
+
+            using (var reader = await command.ExecuteReaderAsync())
+            {
+                if (!reader.HasRows)
+                {
+                    return items;
+                }
+
+                while (reader.Read())
+                {
+                    items.Add(reader.GetFieldValue<T>(0));
+                }
+            }
+
+            return items;
+        }
+
+        protected async Task<T> ExecuteSqlReturningEntity<T>(TCommand command, string sql, List<TParameter> parameters) where T : new()
         {
             var entity = new T();
             var properties = entity.GetType().GetProperties();
@@ -211,7 +237,7 @@ namespace StandardRepository.Helpers.SqlExecutor
             return entity;
         }
 
-        protected async Task<List<T>> ExecuteSqlReturningEntityList<T>(TCommand command, string sql, List<TParameter> parameters = null) where T : BaseEntity, new()
+        protected async Task<List<T>> ExecuteSqlReturningEntityList<T>(TCommand command, string sql, List<TParameter> parameters) where T : BaseEntity, new()
         {
             var items = new List<T>();
 
@@ -247,40 +273,7 @@ namespace StandardRepository.Helpers.SqlExecutor
             return items;
         }
 
-        protected async Task<List<T>> ExecuteSqlReturningList<T>(TCommand command, string sql, List<TParameter> parameters = null)
-        {
-            var items = new List<T>();
-
-            command.CommandText = sql;
-
-            if (parameters != null)
-            {
-                for (var i = 0; i < parameters.Count; i++)
-                {
-                    var parameter = parameters[i];
-                    command.Parameters.Add(parameter);
-                }
-            }
-
-            command.Prepare();
-
-            using (var reader = await command.ExecuteReaderAsync())
-            {
-                if (!reader.HasRows)
-                {
-                    return items;
-                }
-
-                while (reader.Read())
-                {
-                    items.Add(reader.GetFieldValue<T>(0));
-                }
-            }
-
-            return items;
-        }
-
-        protected async Task<List<EntityRevision<T>>> ExecuteSqlReturningRevisionList<T>(TCommand command, string sql, List<TParameter> parameters = null) where T : BaseEntity, new()
+        protected async Task<List<EntityRevision<T>>> ExecuteSqlReturningRevisionList<T>(TCommand command, string sql, List<TParameter> parameters) where T : BaseEntity, new()
         {
             var items = new List<EntityRevision<T>>();
 
@@ -316,25 +309,6 @@ namespace StandardRepository.Helpers.SqlExecutor
             }
 
             return items;
-        }
-
-        protected List<string> ExecuteSqlForList(TCommand command, string sql)
-        {
-            var result = new List<string>();
-            command.CommandText = sql;
-
-            using (var reader = command.ExecuteReader())
-            {
-                if (reader.HasRows)
-                {
-                    while (reader.Read())
-                    {
-                        result.Add(reader.GetString(0));
-                    }
-                }
-            }
-
-            return result;
         }
     }
 }

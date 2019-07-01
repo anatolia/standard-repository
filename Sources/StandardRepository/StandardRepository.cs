@@ -9,7 +9,6 @@ using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 
-using StandardRepository.Factories;
 using StandardRepository.Helpers;
 using StandardRepository.Helpers.SqlExecutor;
 using StandardRepository.Models.Entities;
@@ -42,7 +41,7 @@ namespace StandardRepository
         protected readonly ExpressionUtils _expressionUtils;
 
         protected StandardRepository(TypeLookup typeLookup, SQLConstants sqlConstants, EntityUtils entityUtils, ExpressionUtils expressionUtils,
-                                     ISQLExecutor<TCommand, TParameter> sqlExecutor, List<string> updateableFields = null)
+                                     ISQLExecutor<TCommand, TConnection, TParameter> sqlExecutor, List<string> updateableFields = null)
         {
             _typeLookup = typeLookup;
             _sqlConstants = sqlConstants;
@@ -56,8 +55,8 @@ namespace StandardRepository
             BaseFields = _entityUtils.GetBaseProperties();
         }
 
-        public ISQLExecutor<TCommand, TParameter> SQLExecutor { get; set; }
-        public abstract void SetSqlExecutorForTransaction(IConnectionFactory<TConnection> connectionFactory);
+        public ISQLExecutor<TCommand, TConnection, TParameter> SQLExecutor { get; set; }
+        public abstract void SetSqlExecutorForTransaction(TConnection connection);
 
         public async Task<long> Insert(long currentUserId, T entity)
         {
@@ -97,6 +96,11 @@ namespace StandardRepository
 
         public async Task<bool> Update(long currentUserId, T entity)
         {
+            if (entity.Id < 1)
+            {
+                throw new ArgumentException("entity does not have id!");
+            }
+
             var commandParameters = GetParametersForIdAndCurrentUser(currentUserId, entity.Id);
             SQLExecutor.AddParameter(commandParameters, SQLConstants.NAME_PARAMETER_NAME, entity.Name, DbType.String);
 
@@ -197,7 +201,7 @@ namespace StandardRepository
             var idsInString = string.Join("::bigint,", idList);
             sb.Append($"{_sqlConstants.IdFieldName} IN ({idsInString}){Environment.NewLine}");
 
-            var result = await SQLExecutor.ExecuteSqlReturningEntityList<T>(sb.ToString());
+            var result = await SQLExecutor.ExecuteSqlReturningEntityList<T>(sb.ToString(), null);
             return result;
         }
 

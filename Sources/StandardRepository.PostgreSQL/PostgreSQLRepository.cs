@@ -43,9 +43,9 @@ namespace StandardRepository.PostgreSQL
             QueryRestoreRevision = $"{PostgreSQLConstants.CALL} {_sqlConstants.ProcedureNameRestoreRevision} (:{SQLConstants.UPDATED_BY_PARAMETER_NAME},:{_sqlConstants.IdParameterName},:{SQLConstants.REVISION_PARAMETER_NAME}, null);";
         }
 
-        public override void SetSqlExecutorForTransaction(IConnectionFactory<NpgsqlConnection> connectionFactory)
+        public override void SetSqlExecutorForTransaction(NpgsqlConnection connection)
         {
-            SQLExecutor = new PostgreSQLExecutor(connectionFactory, _entityUtils);
+            SQLExecutor.SetConnection(connection);
         }
 
         protected override void AppendWhere(Expression<Func<T, bool>> @where, List<NpgsqlParameter> parameters, StringBuilder sb, bool isIncludeDeleted)
@@ -78,8 +78,7 @@ namespace StandardRepository.PostgreSQL
         {
             foreach (var prm in prmDictionary)
             {
-                var parameter = new NpgsqlParameter(prm.Value.Name, prm.Value.DbType);
-                parameter.Value = prm.Value.Value;
+                var parameter = new NpgsqlParameter(prm.Value.Name, prm.Value.DbType) { Value = prm.Value.Value };
                 parameters.Add(parameter);
             }
         }
@@ -104,11 +103,9 @@ namespace StandardRepository.PostgreSQL
             }
 
             var parameters = new List<NpgsqlParameter>();
-            var prmSkip = new NpgsqlParameter<int>(SQLConstants.SKIP_PARAMETER_NAME, NpgsqlDbType.Integer);
-            prmSkip.TypedValue = skip;
+            var prmSkip = new NpgsqlParameter<int>(SQLConstants.SKIP_PARAMETER_NAME, NpgsqlDbType.Integer) { TypedValue = skip };
             parameters.Add(prmSkip);
-            var prmTake = new NpgsqlParameter<int>(SQLConstants.TAKE_PARAMETER_NAME, NpgsqlDbType.Integer);
-            prmTake.TypedValue = take;
+            var prmTake = new NpgsqlParameter<int>(SQLConstants.TAKE_PARAMETER_NAME, NpgsqlDbType.Integer) { TypedValue = take };
             parameters.Add(prmTake);
 
             AppendWhere(where, parameters, sb, isIncludeDeleted);
@@ -139,8 +136,7 @@ namespace StandardRepository.PostgreSQL
             }
 
             var parameters = new List<NpgsqlParameter>();
-            var prmTake = new NpgsqlParameter<int>(SQLConstants.TAKE_PARAMETER_NAME, NpgsqlDbType.Integer);
-            prmTake.TypedValue = take;
+            var prmTake = new NpgsqlParameter<int>(SQLConstants.TAKE_PARAMETER_NAME, NpgsqlDbType.Integer) { TypedValue = take };
             parameters.Add(prmTake);
 
             AppendWhere(where, parameters, sb, isIncludeDeleted);
@@ -173,16 +169,14 @@ namespace StandardRepository.PostgreSQL
             }
 
             var parameters = new List<NpgsqlParameter>();
-            var prmTake = new NpgsqlParameter<int>(SQLConstants.TAKE_PARAMETER_NAME, NpgsqlDbType.Integer);
-            prmTake.TypedValue = take;
+            var prmTake = new NpgsqlParameter<int>(SQLConstants.TAKE_PARAMETER_NAME, NpgsqlDbType.Integer) { TypedValue = take };
             parameters.Add(prmTake);
 
             AppendWhere(where, parameters, sb, isIncludeDeleted);
 
             if (lastUid != Guid.Empty)
             {
-                var prmLastUid = new NpgsqlParameter<Guid>(SQLConstants.LAST_UID_PARAMETER_NAME, NpgsqlDbType.Uuid);
-                prmLastUid.TypedValue = lastUid;
+                var prmLastUid = new NpgsqlParameter<Guid>(SQLConstants.LAST_UID_PARAMETER_NAME, NpgsqlDbType.Uuid) { TypedValue = lastUid };
                 parameters.Add(prmLastUid);
 
                 var schemaName = _entityUtils.GetSchemaName(typeof(T));
