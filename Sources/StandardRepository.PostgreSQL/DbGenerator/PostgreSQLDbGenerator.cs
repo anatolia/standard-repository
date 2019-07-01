@@ -181,7 +181,13 @@ namespace StandardRepository.PostgreSQL.DbGenerator
             using (var stream = assembly.GetManifestResourceStream(assembly.GetName().Name + ".Templates." + name))
             using (var reader = new StreamReader(stream))
             {
-                return reader.ReadToEnd();
+                var readToEnd = reader.ReadToEnd();
+                if (Environment.NewLine != "\r\n")
+                {
+                    readToEnd = readToEnd.Replace("\r\n", "\n");
+                }
+
+                return readToEnd;
             }
         }
 
@@ -231,9 +237,9 @@ namespace StandardRepository.PostgreSQL.DbGenerator
 
             var script = template.Replace(FULL_TABLE_NAME, model.TableFullName)
                                  .Replace(TABLE_NAME, model.TableName)
-                                 .Replace(SELF_FIELDS_WITH_PREFIX_AND_TYPE, GetFieldPartOfQuery(entityType, true, false, true,  "prm_", false))
-                                 .Replace(ALL_FIELDS_EXCEPT_ID, GetFieldPartOfQuery(entityType, false, false, false,  "", false))
-                                 .Replace(SELF_FIELDS_WITH_PREFIX, GetFieldPartOfQuery(entityType, true, false, false,  "prm_", false));
+                                 .Replace(SELF_FIELDS_WITH_PREFIX_AND_TYPE, GetFieldPartOfQuery(entityType, true, false, true, "prm_", false))
+                                 .Replace(ALL_FIELDS_EXCEPT_ID, GetFieldPartOfQuery(entityType, false, false, false, "", false))
+                                 .Replace(SELF_FIELDS_WITH_PREFIX, GetFieldPartOfQuery(entityType, true, false, false, "prm_", false));
             return script;
         }
 
@@ -245,7 +251,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
 
             var script = template.Replace(FULL_TABLE_NAME, model.TableFullName)
                                  .Replace(TABLE_NAME, model.TableName)
-                                 .Replace(SELF_FIELDS_WITH_PREFIX_AND_TYPE, GetFieldPartOfQuery(entityType, true, false, true,  "prm_", false))
+                                 .Replace(SELF_FIELDS_WITH_PREFIX_AND_TYPE, GetFieldPartOfQuery(entityType, true, false, true, "prm_", false))
                                  .Replace(SELF_FIELDS_FOR_UPDATE, GetFieldPartOfQueryForUpdate(entityType, "prm_"))
                                  .Replace(RELATED_NAME_UPDATES, GetRelatedNameUpdateQueries(entityType, model));
             return script;
@@ -260,7 +266,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
             var script = template.Replace(FULL_TABLE_NAME, model.TableFullName)
                                  .Replace(TABLE_NAME, model.TableName)
                                  .Replace(ALL_FIELDS_WITH_TYPE, GetFieldPartOfQuery(entityType, false, false, true))
-                                 .Replace(ALL_FIELDS_WITH_PREFIX, GetFieldPartOfQuery(entityType, false, false, false,  "t."));
+                                 .Replace(ALL_FIELDS_WITH_PREFIX, GetFieldPartOfQuery(entityType, false, false, false, "t."));
             return script;
         }
 
@@ -319,7 +325,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
             var script = template.Replace(FULL_TABLE_NAME, model.TableFullName)
                                  .Replace(TABLE_NAME, model.TableName)
                                  .Replace(ALL_FIELDS_INCLUDING_REVISION_FIELDS, GetFieldPartOfQuery(entityType))
-                                 .Replace(ALL_FIELDS_WITH_PREFIX, GetFieldPartOfQuery(entityType, false, false, false,  "t."));
+                                 .Replace(ALL_FIELDS_WITH_PREFIX, GetFieldPartOfQuery(entityType, false, false, false, "t."));
             return script;
         }
 
@@ -332,7 +338,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
             var script = template.Replace(FULL_TABLE_NAME, model.TableFullName)
                                  .Replace(TABLE_NAME, model.TableName)
                                  .Replace(SELF_FIELDS_FOR_UPDATE, GetFieldPartOfQueryForUpdate(entityType, "rev."))
-                                 .Replace(SELF_FIELDS_WITH_PREFIX, GetFieldPartOfQuery(entityType, true, false, false,  "r.", false))
+                                 .Replace(SELF_FIELDS_WITH_PREFIX, GetFieldPartOfQuery(entityType, true, false, false, "r.", false))
                                  .Replace(RELATED_NAME_UPDATES_FOR_RESTORE, GetRelatedNameUpdateQueriesForRestore(entityType, model));
             return script;
         }
