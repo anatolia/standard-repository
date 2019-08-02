@@ -42,8 +42,7 @@ namespace ExampleProject
                 IsActive = false
             };
             var projectId = projectRepository.Insert(1, project).Result;
-            project.Id = projectId;
-
+            
             Console.WriteLine("Project inserted, " + projectId);
 
             project.Name = "other test";
