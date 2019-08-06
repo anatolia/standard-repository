@@ -6,6 +6,11 @@ namespace StandardRepository.Helpers
     {
         public static bool IsExist(this BaseEntity entity)
         {
+            if (entity == null)
+            {
+                return false;
+            }
+            
             return entity.Id > 0;
         }
 
