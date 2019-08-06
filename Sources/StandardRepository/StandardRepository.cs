@@ -78,6 +78,7 @@ namespace StandardRepository
             }
 
             var id = await SQLExecutor.ExecuteSqlReturningValue<long>(QueryInsert, resultParameters);
+            entity.Id = id;
             return id;
         }
 

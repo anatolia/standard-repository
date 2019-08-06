@@ -27,6 +27,7 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
             // assert
             var result = await repository.SelectById(id);
 
+            entity.Id.ShouldBe(id);
             result.Name.ShouldBe(entity.Name);
             result.Email.ShouldBe(entity.Email);
             result.IsActive.ShouldBe(entity.IsActive);
