@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -124,10 +126,26 @@ namespace StandardRepository.PostgreSQL
             sb.Append($"{SQLConstants.SELECT} *{Environment.NewLine}");
             sb.Append($"{SQLConstants.FROM} {_sqlConstants.TableFullName}{Environment.NewLine}");
 
-            var orderColumn = _sqlConstants.IdFieldName;
+            List<string> orderColumns = new List<string>();
+
             if (orderByColumn != null)
             {
-                orderColumn = _expressionUtils.GetField(orderByColumn.Body);
+                var body = orderByColumn.Body as NewExpression;
+                if (body is null)
+                {
+                    orderColumns.Add(_expressionUtils.GetField(orderByColumn.Body));
+                }
+                else
+                {
+                    for (int i = 0; i < body.Arguments.Count; i++)
+                    {
+                        orderColumns.Add(_expressionUtils.GetField(body.Arguments[i]));
+                    }
+                }
+            }
+            else
+            {
+                orderColumns.Add(_sqlConstants.IdFieldName);
             }
 
             var ascOrDesc = SQLConstants.DESC;
@@ -143,12 +161,25 @@ namespace StandardRepository.PostgreSQL
             AppendWhere(where, parameters, sb, isIncludeDeleted);
 
             sb.Append($" {SQLConstants.AND} {_sqlConstants.IdFieldName} > {lastId}{Environment.NewLine}");
-            sb.Append($"{SQLConstants.ORDER_BY} {orderColumn} {ascOrDesc}{Environment.NewLine}");
+
+            sb.Append($"{SQLConstants.ORDER_BY} ");
+            for (int i = 0; i < orderColumns.Count; i++)
+            {
+                sb.Append($"{orderColumns[i]} {ascOrDesc}");
+                if (i != orderColumns.Count - 1)
+                {
+                    sb.Append(", ");
+                }
+            }
+            sb.Append($"{Environment.NewLine}");
+
             sb.Append($"{PostgreSQLConstants.LIMIT} {PostgreSQLConstants.PARAMETER_PRESIGN}{SQLConstants.TAKE_PARAMETER_NAME} {PostgreSQLConstants.OFFSET} 0{Environment.NewLine}");
 
             var items = await SQLExecutor.ExecuteSqlReturningEntityList<T>(sb.ToString(), parameters);
             return items;
         }
+
+
 
         public override async Task<List<T>> SelectAfter(Expression<Func<T, bool>> @where, Guid lastUid, int take = 100,
                                                         Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false)
@@ -157,10 +188,26 @@ namespace StandardRepository.PostgreSQL
             sb.Append($"{SQLConstants.SELECT} *{Environment.NewLine}");
             sb.Append($"{SQLConstants.FROM} {_sqlConstants.TableFullName}{Environment.NewLine}");
 
-            var orderColumn = _sqlConstants.IdFieldName;
+            List<string> orderColumns = new List<string>();
+
             if (orderByColumn != null)
             {
-                orderColumn = _expressionUtils.GetField(orderByColumn.Body);
+                var body = orderByColumn.Body as NewExpression;
+                if (body is null)
+                {
+                    orderColumns.Add(_expressionUtils.GetField(orderByColumn.Body));
+                }
+                else
+                {
+                    for (int i = 0; i < body.Arguments.Count; i++)
+                    {
+                        orderColumns.Add(_expressionUtils.GetField(body.Arguments[i]));
+                    }
+                }
+            }
+            else
+            {
+                orderColumns.Add(_sqlConstants.IdFieldName);
             }
 
             var ascOrDesc = SQLConstants.DESC;
@@ -195,7 +242,17 @@ namespace StandardRepository.PostgreSQL
                 sb.Append($" {_sqlConstants.IdFieldName} > ({SQLConstants.SELECT} {tableName}_id {SQLConstants.FROM} {schemaName}.{tableName} {SQLConstants.WHERE} {tableName}_uid = {PostgreSQLConstants.PARAMETER_PRESIGN}{SQLConstants.LAST_UID_PARAMETER_NAME}){Environment.NewLine}");
             }
 
-            sb.Append($"{SQLConstants.ORDER_BY} {orderColumn} {ascOrDesc}{Environment.NewLine}");
+            sb.Append($"{SQLConstants.ORDER_BY} ");
+            for (int i = 0; i < orderColumns.Count; i++)
+            {
+                sb.Append($"{orderColumns[i]} {ascOrDesc}");
+                if (i != orderColumns.Count - 1)
+                {
+                    sb.Append(", ");
+                }
+            }
+            sb.Append($"{Environment.NewLine}");
+
             sb.Append($"{PostgreSQLConstants.LIMIT} {PostgreSQLConstants.PARAMETER_PRESIGN}{SQLConstants.TAKE_PARAMETER_NAME} {PostgreSQLConstants.OFFSET} 0{Environment.NewLine}");
 
             var items = await SQLExecutor.ExecuteSqlReturningEntityList<T>(sb.ToString(), parameters);
