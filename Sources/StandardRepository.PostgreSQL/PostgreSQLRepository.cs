@@ -87,16 +87,35 @@ namespace StandardRepository.PostgreSQL
         }
 
         public override async Task<List<T>> SelectMany(Expression<Func<T, bool>> @where, int skip = 0, int take = 100,
-                                                       Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false)
+                                                       Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false,
+                                                       Expression<Func<T, object>> distinctByColumn = null)
         {
-            var sb = new StringBuilder();
-            sb.Append($"{SQLConstants.SELECT} *{Environment.NewLine}");
-            sb.Append($"{SQLConstants.FROM} {_sqlConstants.TableFullName}{Environment.NewLine}");
+            List<string> orderColumns = new List<string>();
 
-            var orderColumn = _sqlConstants.IdFieldName;
             if (orderByColumn != null)
             {
-                orderColumn = _expressionUtils.GetField(orderByColumn.Body);
+                var body = orderByColumn.Body as NewExpression;
+                if (body is null)
+                {
+                    orderColumns.Add(_expressionUtils.GetField(orderByColumn.Body));
+                }
+                else
+                {
+                    for (int i = 0; i < body.Arguments.Count; i++)
+                    {
+                        orderColumns.Add(_expressionUtils.GetField(body.Arguments[i]));
+                    }
+                }
+            }
+            else
+            {
+                orderColumns.Add(_sqlConstants.IdFieldName);
+            }
+
+            var distinctColumn = string.Empty;
+            if (distinctByColumn != null)
+            {
+                distinctColumn = _expressionUtils.GetField(distinctByColumn.Body);
             }
 
             var ascOrDesc = SQLConstants.DESC;
@@ -111,8 +130,34 @@ namespace StandardRepository.PostgreSQL
             var prmTake = new NpgsqlParameter<int>(SQLConstants.TAKE_PARAMETER_NAME, NpgsqlDbType.Integer) { TypedValue = take };
             parameters.Add(prmTake);
 
+            var sb = new StringBuilder();
+            sb.Append($"{SQLConstants.SELECT} *{Environment.NewLine}");
+
+            if (!string.IsNullOrEmpty(distinctColumn))
+            {
+                sb.Append($"{SQLConstants.FROM} ({SQLConstants.SELECT} {SQLConstants.DISTINCT} ({distinctColumn}) *");
+            }
+
+            sb.Append($"{SQLConstants.FROM} {_sqlConstants.TableFullName}{Environment.NewLine}");
+
             AppendWhere(where, parameters, sb, isIncludeDeleted);
-            sb.Append($"{SQLConstants.ORDER_BY} {orderColumn} {ascOrDesc}{Environment.NewLine}");
+
+            if (!string.IsNullOrEmpty(distinctColumn))
+            {
+                sb.Append($") p{Environment.NewLine}");
+            }
+
+            sb.Append($"{SQLConstants.ORDER_BY} ");
+            for (int i = 0; i < orderColumns.Count; i++)
+            {
+                sb.Append($"{orderColumns[i]} {ascOrDesc}");
+                if (i != orderColumns.Count - 1)
+                {
+                    sb.Append(", ");
+                }
+            }
+            sb.Append($"{Environment.NewLine}");
+
             sb.Append($"{PostgreSQLConstants.LIMIT} {PostgreSQLConstants.PARAMETER_PRESIGN}{SQLConstants.TAKE_PARAMETER_NAME} {PostgreSQLConstants.OFFSET} {PostgreSQLConstants.PARAMETER_PRESIGN}{SQLConstants.SKIP_PARAMETER_NAME} {Environment.NewLine}");
 
             var items = await SQLExecutor.ExecuteSqlReturningEntityList<T>(sb.ToString(), parameters);
@@ -120,11 +165,10 @@ namespace StandardRepository.PostgreSQL
         }
 
         public override async Task<List<T>> SelectAfter(Expression<Func<T, bool>> @where, long lastId, int take = 100,
-                                                        Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false)
+                                                        Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false,
+                                                        Expression<Func<T, object>> distinctByColumn = null)
         {
-            var sb = new StringBuilder();
-            sb.Append($"{SQLConstants.SELECT} *{Environment.NewLine}");
-            sb.Append($"{SQLConstants.FROM} {_sqlConstants.TableFullName}{Environment.NewLine}");
+
 
             List<string> orderColumns = new List<string>();
 
@@ -148,6 +192,12 @@ namespace StandardRepository.PostgreSQL
                 orderColumns.Add(_sqlConstants.IdFieldName);
             }
 
+            var distinctColumn = string.Empty;
+            if (distinctByColumn != null)
+            {
+                distinctColumn = _expressionUtils.GetField(distinctByColumn.Body);
+            }
+
             var ascOrDesc = SQLConstants.DESC;
             if (isAscending)
             {
@@ -158,9 +208,24 @@ namespace StandardRepository.PostgreSQL
             var prmTake = new NpgsqlParameter<int>(SQLConstants.TAKE_PARAMETER_NAME, NpgsqlDbType.Integer) { TypedValue = take };
             parameters.Add(prmTake);
 
+            var sb = new StringBuilder();
+            sb.Append($"{SQLConstants.SELECT} *{Environment.NewLine}");
+
+            if (!string.IsNullOrEmpty(distinctColumn))
+            {
+                sb.Append($"{SQLConstants.FROM} ({SQLConstants.SELECT} {SQLConstants.DISTINCT} ({distinctColumn}) *");
+            }
+
+            sb.Append($"{SQLConstants.FROM} {_sqlConstants.TableFullName}{Environment.NewLine}");
+
             AppendWhere(where, parameters, sb, isIncludeDeleted);
 
             sb.Append($" {SQLConstants.AND} {_sqlConstants.IdFieldName} > {lastId}{Environment.NewLine}");
+
+            if (!string.IsNullOrEmpty(distinctColumn))
+            {
+                sb.Append($") p{Environment.NewLine}");
+            }
 
             sb.Append($"{SQLConstants.ORDER_BY} ");
             for (int i = 0; i < orderColumns.Count; i++)
@@ -179,15 +244,10 @@ namespace StandardRepository.PostgreSQL
             return items;
         }
 
-
-
         public override async Task<List<T>> SelectAfter(Expression<Func<T, bool>> @where, Guid lastUid, int take = 100,
-                                                        Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false)
+                                                        Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false,
+                                                        Expression<Func<T, object>> distinctByColumn = null)
         {
-            var sb = new StringBuilder();
-            sb.Append($"{SQLConstants.SELECT} *{Environment.NewLine}");
-            sb.Append($"{SQLConstants.FROM} {_sqlConstants.TableFullName}{Environment.NewLine}");
-
             List<string> orderColumns = new List<string>();
 
             if (orderByColumn != null)
@@ -210,6 +270,12 @@ namespace StandardRepository.PostgreSQL
                 orderColumns.Add(_sqlConstants.IdFieldName);
             }
 
+            var distinctColumn = string.Empty;
+            if (distinctByColumn != null)
+            {
+                distinctColumn = _expressionUtils.GetField(distinctByColumn.Body);
+            }
+
             var ascOrDesc = SQLConstants.DESC;
             if (isAscending)
             {
@@ -219,6 +285,16 @@ namespace StandardRepository.PostgreSQL
             var parameters = new List<NpgsqlParameter>();
             var prmTake = new NpgsqlParameter<int>(SQLConstants.TAKE_PARAMETER_NAME, NpgsqlDbType.Integer) { TypedValue = take };
             parameters.Add(prmTake);
+
+            var sb = new StringBuilder();
+            sb.Append($"{SQLConstants.SELECT} *{Environment.NewLine}");
+
+            if (!string.IsNullOrEmpty(distinctColumn))
+            {
+                sb.Append($"{SQLConstants.FROM} ({SQLConstants.SELECT} {SQLConstants.DISTINCT} ({distinctColumn}) *");
+            }
+
+            sb.Append($"{SQLConstants.FROM} {_sqlConstants.TableFullName}{Environment.NewLine}");
 
             AppendWhere(where, parameters, sb, isIncludeDeleted);
 
@@ -240,6 +316,11 @@ namespace StandardRepository.PostgreSQL
                 }
 
                 sb.Append($" {_sqlConstants.IdFieldName} > ({SQLConstants.SELECT} {tableName}_id {SQLConstants.FROM} {schemaName}.{tableName} {SQLConstants.WHERE} {tableName}_uid = {PostgreSQLConstants.PARAMETER_PRESIGN}{SQLConstants.LAST_UID_PARAMETER_NAME}){Environment.NewLine}");
+            }
+
+            if (!string.IsNullOrEmpty(distinctColumn))
+            {
+                sb.Append($") p{Environment.NewLine}");
             }
 
             sb.Append($"{SQLConstants.ORDER_BY} ");

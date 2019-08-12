@@ -55,9 +55,9 @@ namespace StandardRepository
         Task<T> SelectById(long id);
         Task<T> Select(Expression<Func<T, bool>> where, bool isIncludeDeleted = false);
         Task<List<T>> SelectMany(IEnumerable<long> ids, bool isIncludeDeleted = false);
-        Task<List<T>> SelectMany(Expression<Func<T, bool>> where, int skip = 0, int take = 100, Expression<Func<T, object>> orderColumn = null, bool isAscending = true, bool isIncludeDeleted = false);
-        Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, long lastId, int take = 100, Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false);
-        Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, Guid lastUid, int take = 100, Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false);
+        Task<List<T>> SelectMany(Expression<Func<T, bool>> where, int skip = 0, int take = 100, Expression<Func<T, object>> orderColumn = null, bool isAscending = true, bool isIncludeDeleted = false, Expression<Func<T, object>> distinctByColumn = null);
+        Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, long lastId, int take = 100, Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false, Expression<Func<T, object>> distinctByColumn = null);
+        Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, Guid lastUid, int take = 100, Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false, Expression<Func<T, object>> distinctByColumn = null);
         Task<List<long>> SelectIds(Expression<Func<T, bool>> where, bool isIncludeDeleted = false);
         Task<List<T>> SelectAll(Expression<Func<T, bool>> where, Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false);
 

@@ -28,6 +28,7 @@ namespace StandardRepository.Helpers
         public const string DESC = "DESC";
         public const string AND = "AND";
         public const string OR = "OR";
+        public const string DISTINCT = "DISTINCT ON";
 
         public const string PARAMETER_PRESIGN = "@";
         public const string PARAMETER_PREFIX = "prm_";

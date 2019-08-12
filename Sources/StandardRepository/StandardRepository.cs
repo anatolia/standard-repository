@@ -207,13 +207,16 @@ namespace StandardRepository
         }
 
         public abstract Task<List<T>> SelectMany(Expression<Func<T, bool>> where, int skip = 0, int take = 100,
-                                                 Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false);
+                                                 Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false,
+                                                 Expression<Func<T, object>> distinctByColumn = null);
 
         public abstract Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, long lastId, int take = 100,
-                                                  Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false);
+                                                  Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false, 
+                                                  Expression<Func<T, object>> distinctByColumn = null);
 
         public abstract Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, Guid lastUid, int take = 100,
-                                                  Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false);
+                                                  Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false, 
+                                                  Expression<Func<T, object>> distinctByColumn = null);
 
         public abstract Task<List<long>> SelectIds(Expression<Func<T, bool>> where, bool isIncludeDeleted = false);
 
