@@ -16,6 +16,7 @@ namespace StandardRepository.Helpers
         public const string INTO = "INTO";
         public const string SET = "SET";
         public const string ORDER_BY = "ORDER BY";
+        public const string DISTINCT = "DISTINCT";
         public const string WHERE = "WHERE";
         public const string COUNT = "COUNT";
         public const string MIN = "MIN";
@@ -73,6 +74,7 @@ namespace StandardRepository.Helpers
         public SQLConstants(string schemaName, string tableName)
         {
             SetProperties(schemaName, tableName);
+            ParameterSign = PARAMETER_PRESIGN + PARAMETER_PREFIX;
         }
 
         public SQLConstants(Type entityType, EntityUtils entityUtils)

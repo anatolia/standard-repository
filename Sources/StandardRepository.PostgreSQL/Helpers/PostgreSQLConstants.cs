@@ -31,13 +31,16 @@ namespace StandardRepository.PostgreSQL.Helpers
         public const string WHERE_IS_NOT_DELETED_AND = "WHERE is_deleted = false AND";
 
         public new const string PARAMETER_PRESIGN = ":";
+        public override string ParameterSign { get; }
 
         public PostgreSQLConstants(string schemaName, string tableName) : base(schemaName, tableName)
         {
+            ParameterSign = PARAMETER_PRESIGN + PARAMETER_PREFIX;
         }
 
         public PostgreSQLConstants(Type entityType, EntityUtils entityUtils) : base(entityType, entityUtils)
         {
+            ParameterSign = PARAMETER_PRESIGN + PARAMETER_PREFIX;
         }
     }
 
