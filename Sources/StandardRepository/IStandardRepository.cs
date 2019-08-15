@@ -4,7 +4,7 @@ using System.Data.Common;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-using StandardRepository.Factories;
+using StandardRepository.Models;
 using StandardRepository.Models.Entities;
 
 namespace StandardRepository
@@ -41,6 +41,7 @@ namespace StandardRepository
         Task<int> InsertBulk(long currentUserId, Guid bulkImportJobUid);
 
         Task<bool> Update(long currentUserId, T entity);
+        Task<bool> UpdateBulk(long currentUserId, Expression<Func<T, bool>> where, List<UpdateInfo<T>> updateInfos);
         Task<bool> UpdateField(long currentUserId, long id, string fieldName, object value);
 
         Task<bool> Delete(long currentUserId, long id);
@@ -53,19 +54,33 @@ namespace StandardRepository
         /// <param name="id"></param>
         /// <returns></returns>
         Task<T> SelectById(long id);
+        /// <summary>
+        /// Selects first record according to the filter
+        /// </summary>
+        /// <param name="where"></param>
+        /// <param name="isIncludeDeleted"></param>
+        /// <returns></returns>
         Task<T> Select(Expression<Func<T, bool>> where, bool isIncludeDeleted = false);
         Task<List<T>> SelectMany(IEnumerable<long> ids, bool isIncludeDeleted = false);
-        Task<List<T>> SelectMany(Expression<Func<T, bool>> where, int skip = 0, int take = 100, Expression<Func<T, object>> orderColumn = null, bool isAscending = true, bool isIncludeDeleted = false);
+        [Obsolete]
+        Task<List<T>> SelectMany(Expression<Func<T, bool>> where, int skip = 0, int take = 100, Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false);
+        Task<List<T>> SelectMany(Expression<Func<T, bool>> where, int skip = 0, int take = 100, bool isIncludeDeleted = false, List<OrderByInfo<T>> orderByInfos = null);
+        [Obsolete]
         Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, long lastId, int take = 100, Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false);
+        Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, long lastId, int take = 100, bool isIncludeDeleted = false, List<OrderByInfo<T>> orderByInfos = null);
+        [Obsolete]
         Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, Guid lastUid, int take = 100, Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false);
+        Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, Guid lastUid, int take = 100, bool isIncludeDeleted = false, List<OrderByInfo<T>> orderByInfos = null);
         Task<List<long>> SelectIds(Expression<Func<T, bool>> where, bool isIncludeDeleted = false);
+        [Obsolete]
         Task<List<T>> SelectAll(Expression<Func<T, bool>> where, Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false);
+        Task<List<T>> SelectAll(Expression<Func<T, bool>> where, bool isIncludeDeleted = false, List<OrderByInfo<T>> orderByInfos = null);
 
         Task<List<EntityRevision<T>>> SelectRevisions(long id);
         Task<bool> RestoreRevision(long currentUserId, long id, int revision);
 
         Task<bool> Any(Expression<Func<T, bool>> where = null, bool isIncludeDeleted = false);
-        Task<int> Count(Expression<Func<T, bool>> where = null, bool isIncludeDeleted = false);
+        Task<int> Count(Expression<Func<T, bool>> where = null, bool isIncludeDeleted = false, List<DistinctInfo<T>> distinctInfos = null);
 
         Task<long> Max(Expression<Func<T, bool>> where = null, Expression<Func<T, long>> maxColumn = null, bool isIncludeDeleted = false);
         Task<int> Max(Expression<Func<T, bool>> where = null, Expression<Func<T, int>> maxColumn = null, bool isIncludeDeleted = false);

@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 using StandardRepository.Helpers;
 using StandardRepository.Helpers.SqlExecutor;
+using StandardRepository.Models;
 using StandardRepository.Models.Entities;
 
 namespace StandardRepository
@@ -116,6 +117,47 @@ namespace StandardRepository
             return true;
         }
 
+        public async Task<bool> UpdateBulk(long currentUserId, Expression<Func<T, bool>> where, List<UpdateInfo<T>> updateInfos)
+        {
+            if (updateInfos == null || updateInfos.Count < 1)
+            {
+                throw new ArgumentException("at least one updateInfo should passed!");
+            }
+
+            var sb = new StringBuilder();
+            sb.Append($"{SQLConstants.UPDATE} {_sqlConstants.TableFullName}{Environment.NewLine}");
+            sb.Append($"{SQLConstants.SET} updated_by = {_sqlConstants.ParameterSign}{SQLConstants.UPDATED_BY_PARAMETER_NAME}, updated_at = now(), ");
+
+            var parameters = new List<TParameter>();
+            SQLExecutor.AddParameter(parameters, $"{_sqlConstants.ParameterSign}{SQLConstants.UPDATED_BY_PARAMETER_NAME}", currentUserId, DbType.Int64);
+
+            for (var i = 0; i < updateInfos.Count; i++)
+            {
+                var updateInfo = updateInfos[i];
+                if (updateInfo.UpdateColumn == null)
+                {
+                    continue;
+                }
+
+                var updateColumn = _expressionUtils.GetField(updateInfo.UpdateColumn.Body);
+                SQLExecutor.AddParameter(parameters, $"{_sqlConstants.ParameterSign}{updateColumn}", updateInfo.Value);
+
+                sb.Append($"{updateColumn} = {_sqlConstants.ParameterSign}{updateColumn}");
+
+                if (i != updateInfos.Count - 1)
+                {
+                    sb.Append(", ");
+                }
+            }
+
+            sb.Append(" ");
+
+            AppendWhere(where, parameters, sb, false);
+
+            await SQLExecutor.ExecuteSql(sb.ToString(), parameters);
+            return true;
+        }
+
         public async Task<bool> UpdateField(long currentUserId, long id, string fieldName, object value)
         {
             if (!UpdateableFields.Any()
@@ -206,19 +248,34 @@ namespace StandardRepository
             return result;
         }
 
+        [Obsolete]
         public abstract Task<List<T>> SelectMany(Expression<Func<T, bool>> where, int skip = 0, int take = 100,
                                                  Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false);
 
+        public abstract Task<List<T>> SelectMany(Expression<Func<T, bool>> where, int skip = 0, int take = 100, bool isIncludeDeleted = false,
+                                                 List<OrderByInfo<T>> orderByInfos = null);
+
+        [Obsolete]
         public abstract Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, long lastId, int take = 100,
                                                   Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false);
 
+        public abstract Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, long lastId, int take = 100, bool isIncludeDeleted = false,
+                                                  List<OrderByInfo<T>> orderByInfos = null);
+
+        [Obsolete]
         public abstract Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, Guid lastUid, int take = 100,
                                                   Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false);
 
+        public abstract Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, Guid lastUid, int take = 100, bool isIncludeDeleted = false,
+                                                  List<OrderByInfo<T>> orderByInfos = null);
+
         public abstract Task<List<long>> SelectIds(Expression<Func<T, bool>> where, bool isIncludeDeleted = false);
 
+        [Obsolete]
         public abstract Task<List<T>> SelectAll(Expression<Func<T, bool>> where, Expression<Func<T, object>> orderByColumn = null,
                                                 bool isAscending = true, bool isIncludeDeleted = false);
+
+        public abstract Task<List<T>> SelectAll(Expression<Func<T, bool>> where, bool isIncludeDeleted = false, List<OrderByInfo<T>> orderByInfos = null);
 
         public async Task<List<EntityRevision<T>>> SelectRevisions(long id)
         {
@@ -250,10 +307,39 @@ namespace StandardRepository
             return result;
         }
 
-        public async Task<int> Count(Expression<Func<T, bool>> where = null, bool isIncludeDeleted = false)
+        public async Task<int> Count(Expression<Func<T, bool>> where = null, bool isIncludeDeleted = false, List<DistinctInfo<T>> distinctInfos = null)
         {
             var sb = new StringBuilder();
-            sb.Append($"{SQLConstants.SELECT} {SQLConstants.COUNT}(*){Environment.NewLine}");
+
+            if (distinctInfos != null)
+            {
+                sb.Append($"{SQLConstants.SELECT} {SQLConstants.COUNT} ({SQLConstants.DISTINCT} ");
+
+                for (var i = 0; i < distinctInfos.Count; i++)
+                {
+                    var distinctInfo = distinctInfos[i];
+
+                    var distinctColumn = _sqlConstants.IdFieldName;
+                    if (distinctInfo.DistinctColumn != null)
+                    {
+                        distinctColumn = _expressionUtils.GetField(distinctInfo.DistinctColumn.Body);
+                    }
+
+                    sb.Append($"{distinctColumn}");
+
+                    if (i != distinctInfos.Count - 1)
+                    {
+                        sb.Append(", ");
+                    }
+                }
+
+                sb.Append(")");
+            }
+            else
+            {
+                sb.Append($"{SQLConstants.SELECT} {SQLConstants.COUNT}(*){Environment.NewLine}");
+            }
+
             sb.Append($"{SQLConstants.FROM} {_sqlConstants.TableFullName}{Environment.NewLine}");
 
             var parameters = new List<TParameter>();
@@ -273,7 +359,7 @@ namespace StandardRepository
             var maxColumnField = _expressionUtils.GetField(maxColumn.Body);
 
             var parameters = new List<TParameter>();
-            var sb = GetMaxColumnQuery(where, maxColumnField, parameters);
+            var sb = GetMaxColumnQuery(where, maxColumnField, parameters, isIncludeDeleted);
 
             var result = await SQLExecutor.ExecuteSqlReturningValue<long>(sb, parameters);
             return result;
@@ -289,7 +375,7 @@ namespace StandardRepository
             var maxColumnField = _expressionUtils.GetField(maxColumn.Body);
 
             var parameters = new List<TParameter>();
-            var sb = GetMaxColumnQuery(where, maxColumnField, parameters);
+            var sb = GetMaxColumnQuery(where, maxColumnField, parameters, isIncludeDeleted);
 
             var result = await SQLExecutor.ExecuteSqlReturningValue<int>(sb, parameters);
             return result;
@@ -305,7 +391,7 @@ namespace StandardRepository
             var maxColumnField = _expressionUtils.GetField(maxColumn.Body);
 
             var parameters = new List<TParameter>();
-            var sb = GetMaxColumnQuery(where, maxColumnField, parameters);
+            var sb = GetMaxColumnQuery(where, maxColumnField, parameters, isIncludeDeleted);
 
             var result = await SQLExecutor.ExecuteSqlReturningValue<decimal>(sb, parameters);
             return result;
@@ -321,7 +407,7 @@ namespace StandardRepository
             var minColumnField = _expressionUtils.GetField(minColumn.Body);
 
             var parameters = new List<TParameter>();
-            var sb = GetMinColumnQuery(where, minColumnField, parameters);
+            var sb = GetMinColumnQuery(where, minColumnField, parameters, isIncludeDeleted);
 
             var result = await SQLExecutor.ExecuteSqlReturningValue<long>(sb, parameters);
             return result;
@@ -337,7 +423,7 @@ namespace StandardRepository
             var minColumnField = _expressionUtils.GetField(minColumn.Body);
 
             var parameters = new List<TParameter>();
-            var sb = GetMinColumnQuery(where, minColumnField, parameters);
+            var sb = GetMinColumnQuery(where, minColumnField, parameters, isIncludeDeleted);
 
             var result = await SQLExecutor.ExecuteSqlReturningValue<int>(sb, parameters);
             return result;
@@ -353,7 +439,7 @@ namespace StandardRepository
             var minColumnField = _expressionUtils.GetField(minColumn.Body);
 
             var parameters = new List<TParameter>();
-            var sb = GetMinColumnQuery(where, minColumnField, parameters);
+            var sb = GetMinColumnQuery(where, minColumnField, parameters, isIncludeDeleted);
 
             var result = await SQLExecutor.ExecuteSqlReturningValue<decimal>(sb, parameters);
             return result;
@@ -369,7 +455,7 @@ namespace StandardRepository
             var sumColumnField = _expressionUtils.GetField(sumColumn.Body);
 
             var parameters = new List<TParameter>();
-            var sb = GetSumColumnQuery(where, sumColumnField, parameters);
+            var sb = GetSumColumnQuery(where, sumColumnField, parameters, isIncludeDeleted);
 
             var result = await SQLExecutor.ExecuteSqlReturningValue<long>(sb, parameters);
             return result;
@@ -385,7 +471,7 @@ namespace StandardRepository
             var sumColumnField = _expressionUtils.GetField(sumColumn.Body);
 
             var parameters = new List<TParameter>();
-            var sb = GetSumColumnQuery(where, sumColumnField, parameters);
+            var sb = GetSumColumnQuery(where, sumColumnField, parameters, isIncludeDeleted);
 
             var result = await SQLExecutor.ExecuteSqlReturningValue<int>(sb, parameters);
             return result;
@@ -401,7 +487,7 @@ namespace StandardRepository
             var sumColumnField = _expressionUtils.GetField(sumColumn.Body);
 
             var parameters = new List<TParameter>();
-            var sb = GetSumColumnQuery(where, sumColumnField, parameters);
+            var sb = GetSumColumnQuery(where, sumColumnField, parameters, isIncludeDeleted);
 
             var result = await SQLExecutor.ExecuteSqlReturningValue<decimal>(sb, parameters);
             return result;
@@ -464,7 +550,7 @@ namespace StandardRepository
             return parameters;
         }
 
-        private string GetMinColumnQuery(Expression<Func<T, bool>> where, string minColumnField, List<TParameter> parameters, bool isIncludeDeleted = false)
+        private string GetMinColumnQuery(Expression<Func<T, bool>> where, string minColumnField, List<TParameter> parameters, bool isIncludeDeleted)
         {
             var sb = new StringBuilder();
             sb.Append($"{SQLConstants.SELECT} {SQLConstants.MIN}({minColumnField}){Environment.NewLine}");
@@ -475,7 +561,7 @@ namespace StandardRepository
             return sb.ToString();
         }
 
-        private string GetMaxColumnQuery(Expression<Func<T, bool>> where, string maxColumnField, List<TParameter> parameters, bool isIncludeDeleted = false)
+        private string GetMaxColumnQuery(Expression<Func<T, bool>> where, string maxColumnField, List<TParameter> parameters, bool isIncludeDeleted)
         {
             var sb = new StringBuilder();
             sb.AppendLine($"{SQLConstants.SELECT} {SQLConstants.MAX}({maxColumnField})");
@@ -486,7 +572,7 @@ namespace StandardRepository
             return sb.ToString();
         }
 
-        private string GetSumColumnQuery(Expression<Func<T, bool>> where, string sumColumnField, List<TParameter> parameters, bool isIncludeDeleted = false)
+        private string GetSumColumnQuery(Expression<Func<T, bool>> where, string sumColumnField, List<TParameter> parameters, bool isIncludeDeleted)
         {
             var sb = new StringBuilder();
             sb.Append($"{SQLConstants.SELECT} {SQLConstants.SUM}({sumColumnField}){Environment.NewLine}");
