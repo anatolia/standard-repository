@@ -12,9 +12,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\LICENSE">
-      <Pack>True</Pack>
+    <None Include="..\..\LICENSE" Link="LICENSE">
       <PackagePath></PackagePath>
+      <Pack>True</Pack>
     </None>
   </ItemGroup>
 

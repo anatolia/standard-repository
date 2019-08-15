@@ -49,7 +49,7 @@ namespace StandardRepository.PostgreSQL
             SQLExecutor.SetConnection(connection);
         }
 
-        protected override void AppendWhere(Expression<Func<T, bool>> @where, List<NpgsqlParameter> parameters, StringBuilder sb, bool isIncludeDeleted)
+        protected override void AppendWhere(Expression<Func<T, bool>> where, List<NpgsqlParameter> parameters, StringBuilder sb, bool isIncludeDeleted)
         {
             if (where != null)
             {
@@ -84,7 +84,7 @@ namespace StandardRepository.PostgreSQL
             }
         }
 
-        public override async Task<List<T>> SelectMany(Expression<Func<T, bool>> @where, int skip = 0, int take = 100,
+        public override async Task<List<T>> SelectMany(Expression<Func<T, bool>> where, int skip = 0, int take = 100,
                                                        Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false)
         {
             var sb = new StringBuilder();
@@ -117,7 +117,7 @@ namespace StandardRepository.PostgreSQL
             return items;
         }
 
-        public override async Task<List<T>> SelectAfter(Expression<Func<T, bool>> @where, long lastId, int take = 100,
+        public override async Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, long lastId, int take = 100,
                                                         Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false)
         {
             var sb = new StringBuilder();
@@ -150,7 +150,7 @@ namespace StandardRepository.PostgreSQL
             return items;
         }
 
-        public override async Task<List<T>> SelectAfter(Expression<Func<T, bool>> @where, Guid lastUid, int take = 100,
+        public override async Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, Guid lastUid, int take = 100,
                                                         Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false)
         {
             var sb = new StringBuilder();
@@ -202,7 +202,7 @@ namespace StandardRepository.PostgreSQL
             return items;
         }
 
-        public override async Task<List<long>> SelectIds(Expression<Func<T, bool>> @where, bool isIncludeDeleted = false)
+        public override async Task<List<long>> SelectIds(Expression<Func<T, bool>> where, bool isIncludeDeleted = false)
         {
             var sb = new StringBuilder();
             sb.Append($"{SQLConstants.SELECT} {_sqlConstants.IdFieldName}{Environment.NewLine}");
@@ -232,7 +232,7 @@ namespace StandardRepository.PostgreSQL
             return result;
         }
 
-        public override async Task<List<T>> SelectAll(Expression<Func<T, bool>> @where, Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false)
+        public override async Task<List<T>> SelectAll(Expression<Func<T, bool>> where, Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false)
         {
             var sb = new StringBuilder();
             sb.Append($"{SQLConstants.SELECT} *{Environment.NewLine}");

@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE" Link="LICENSE">
+      <PackagePath></PackagePath>
+      <Pack>True</Pack>
+    </None>
+  </ItemGroup>
+
+</Project>

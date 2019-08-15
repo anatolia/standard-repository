@@ -130,7 +130,7 @@ namespace StandardRepository
 
             var updateSql = $@"{SQLConstants.UPDATE} {_sqlConstants.TableFullName} 
                                {SQLConstants.SET} {fieldName} = {prmName}
-                               {SQLConstants.WHERE}  {_sqlConstants.IdFieldName} = {_sqlConstants.ParameterSign}{_sqlConstants.IdParameterName}";
+                               {SQLConstants.WHERE} {_sqlConstants.IdFieldName} = {_sqlConstants.ParameterSign}{_sqlConstants.IdParameterName}";
 
             await SQLExecutor.ExecuteSql(updateSql, parameters);
             return true;
@@ -168,7 +168,7 @@ namespace StandardRepository
 
         protected abstract void AppendWhere(Expression<Func<T, bool>> where, List<TParameter> parameters, StringBuilder sb, bool isIncludeDeleted);
 
-        public async Task<T> Select(Expression<Func<T, bool>> @where, bool isIncludeDeleted = false)
+        public async Task<T> Select(Expression<Func<T, bool>> where, bool isIncludeDeleted = false)
         {
             var sb = new StringBuilder();
             sb.Append($"{SQLConstants.SELECT} *{Environment.NewLine}");
@@ -237,7 +237,7 @@ namespace StandardRepository
             return result == 1;
         }
 
-        public async Task<bool> Any(Expression<Func<T, bool>> @where = null, bool isIncludeDeleted = false)
+        public async Task<bool> Any(Expression<Func<T, bool>> where = null, bool isIncludeDeleted = false)
         {
             var sb = new StringBuilder();
             sb.AppendLine($"{SQLConstants.SELECT} 1");
@@ -250,7 +250,7 @@ namespace StandardRepository
             return result;
         }
 
-        public async Task<int> Count(Expression<Func<T, bool>> @where = null, bool isIncludeDeleted = false)
+        public async Task<int> Count(Expression<Func<T, bool>> where = null, bool isIncludeDeleted = false)
         {
             var sb = new StringBuilder();
             sb.Append($"{SQLConstants.SELECT} {SQLConstants.COUNT}(*){Environment.NewLine}");
@@ -263,7 +263,7 @@ namespace StandardRepository
             return result;
         }
 
-        public async Task<long> Max(Expression<Func<T, bool>> @where = null, Expression<Func<T, long>> maxColumn = null, bool isIncludeDeleted = false)
+        public async Task<long> Max(Expression<Func<T, bool>> where = null, Expression<Func<T, long>> maxColumn = null, bool isIncludeDeleted = false)
         {
             if (maxColumn == null)
             {
@@ -279,7 +279,7 @@ namespace StandardRepository
             return result;
         }
 
-        public async Task<int> Max(Expression<Func<T, bool>> @where = null, Expression<Func<T, int>> maxColumn = null, bool isIncludeDeleted = false)
+        public async Task<int> Max(Expression<Func<T, bool>> where = null, Expression<Func<T, int>> maxColumn = null, bool isIncludeDeleted = false)
         {
             if (maxColumn == null)
             {
@@ -295,7 +295,7 @@ namespace StandardRepository
             return result;
         }
 
-        public async Task<decimal> Max(Expression<Func<T, bool>> @where = null, Expression<Func<T, decimal>> maxColumn = null, bool isIncludeDeleted = false)
+        public async Task<decimal> Max(Expression<Func<T, bool>> where = null, Expression<Func<T, decimal>> maxColumn = null, bool isIncludeDeleted = false)
         {
             if (maxColumn == null)
             {
@@ -311,7 +311,7 @@ namespace StandardRepository
             return result;
         }
 
-        public async Task<long> Min(Expression<Func<T, bool>> @where = null, Expression<Func<T, long>> minColumn = null, bool isIncludeDeleted = false)
+        public async Task<long> Min(Expression<Func<T, bool>> where = null, Expression<Func<T, long>> minColumn = null, bool isIncludeDeleted = false)
         {
             if (minColumn == null)
             {
@@ -327,7 +327,7 @@ namespace StandardRepository
             return result;
         }
 
-        public async Task<int> Min(Expression<Func<T, bool>> @where = null, Expression<Func<T, int>> minColumn = null, bool isIncludeDeleted = false)
+        public async Task<int> Min(Expression<Func<T, bool>> where = null, Expression<Func<T, int>> minColumn = null, bool isIncludeDeleted = false)
         {
             if (minColumn == null)
             {
@@ -343,7 +343,7 @@ namespace StandardRepository
             return result;
         }
 
-        public async Task<decimal> Min(Expression<Func<T, bool>> @where = null, Expression<Func<T, decimal>> minColumn = null, bool isIncludeDeleted = false)
+        public async Task<decimal> Min(Expression<Func<T, bool>> where = null, Expression<Func<T, decimal>> minColumn = null, bool isIncludeDeleted = false)
         {
             if (minColumn == null)
             {
@@ -359,7 +359,7 @@ namespace StandardRepository
             return result;
         }
 
-        public async Task<long> Sum(Expression<Func<T, bool>> @where = null, Expression<Func<T, long>> sumColumn = null, bool isIncludeDeleted = false)
+        public async Task<long> Sum(Expression<Func<T, bool>> where = null, Expression<Func<T, long>> sumColumn = null, bool isIncludeDeleted = false)
         {
             if (sumColumn == null)
             {
@@ -375,7 +375,7 @@ namespace StandardRepository
             return result;
         }
 
-        public async Task<int> Sum(Expression<Func<T, bool>> @where = null, Expression<Func<T, int>> sumColumn = null, bool isIncludeDeleted = false)
+        public async Task<int> Sum(Expression<Func<T, bool>> where = null, Expression<Func<T, int>> sumColumn = null, bool isIncludeDeleted = false)
         {
             if (sumColumn == null)
             {
@@ -391,7 +391,7 @@ namespace StandardRepository
             return result;
         }
 
-        public async Task<decimal> Sum(Expression<Func<T, bool>> @where = null, Expression<Func<T, decimal>> sumColumn = null, bool isIncludeDeleted = false)
+        public async Task<decimal> Sum(Expression<Func<T, bool>> where = null, Expression<Func<T, decimal>> sumColumn = null, bool isIncludeDeleted = false)
         {
             if (sumColumn == null)
             {
