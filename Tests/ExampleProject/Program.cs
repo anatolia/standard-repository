@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Linq;
+using System.Linq.Expressions;
 using Npgsql;
 using StandardRepository.PostgreSQL;
 using StandardRepository.PostgreSQL.Factories;
@@ -8,6 +9,7 @@ using StandardRepository.PostgreSQL.Helpers;
 
 using ExampleProject.Entities;
 using ExampleProject.Repositories;
+using StandardRepository.Models;
 
 namespace ExampleProject
 {
@@ -18,10 +20,15 @@ namespace ExampleProject
             var dbGenerator = new DbGenerator();
             var (typeLookup, entityUtils, connectionSettings, sqlExecutor) = dbGenerator.Generate();
             Console.WriteLine("Db Generated!");
-            
+
             var organizationRepository = new OrganizationRepository(typeLookup, new PostgreSQLConstants<Organization>(entityUtils),
                                                                     entityUtils, new PostgreSQLExpressionUtils(), sqlExecutor, new List<string>());
 
+            var projectRepository = new ProjectRepository(typeLookup, new PostgreSQLConstants<Project>(entityUtils),
+                                                          entityUtils, new PostgreSQLExpressionUtils(), sqlExecutor, new List<string>());
+
+
+            #region initial example
             var organization = new Organization
             {
                 Name = "test",
@@ -31,9 +38,6 @@ namespace ExampleProject
 
             Console.WriteLine("Organization inserted, " + orgId);
 
-            var projectRepository = new ProjectRepository(typeLookup, new PostgreSQLConstants<Project>(entityUtils),
-                                                          entityUtils, new PostgreSQLExpressionUtils(), sqlExecutor, new List<string>());
-
             var project = new Project
             {
                 Name = "test",
@@ -42,7 +46,7 @@ namespace ExampleProject
                 IsActive = false
             };
             var projectId = projectRepository.Insert(1, project).Result;
-            
+
             Console.WriteLine("Project inserted, " + projectId);
 
             project.Name = "other test";
@@ -72,7 +76,7 @@ namespace ExampleProject
                     projectRepository.SetSqlExecutorForTransaction(cnn);
 
                     var orgIdOther = organizationRepository.Insert(1, organization).Result;
-                    
+
                     project.OrganizationId = orgIdOther;
                     project.OrganizationUid = organization.Uid;
                     project.OrganizationName = organization.Name;
@@ -87,9 +91,36 @@ namespace ExampleProject
             {
                 Console.WriteLine(e);
             }
-            
+
             Console.WriteLine("project count " + projectRepository.Count().Result);
             Console.WriteLine("organization count " + organizationRepository.Count().Result);
+            #endregion
+
+            #region order by example
+
+            for (var i = 0; i < 10; i++)
+            {
+                var organizationForOrderBy = new Organization
+                {
+                    Name = "test " + i + 1,
+                    Email = "test@test.com" + (i - 10),
+                    Description = "order by test"
+                };
+                organizationRepository.Insert(1, organizationForOrderBy).Wait();
+            }
+
+            var orderedItems = organizationRepository.SelectAll(x => x.Description == "order by test", false,
+                                                                new List<OrderByInfo<Organization>> { new OrderByInfo<Organization>(y => y.Email, false) }).Result;
+
+            Console.WriteLine("email desc ordered, first item > " + orderedItems.First().Email);
+
+            orderedItems = organizationRepository.SelectAll(x => x.Description == "order by test", false,
+                                                            new List<OrderByInfo<Organization>> { new OrderByInfo<Organization>(y => y.Name),
+                                                                                                  new OrderByInfo<Organization>(y => y.Id, false), }).Result;
+
+            Console.WriteLine("name asc ordered, first item > " + orderedItems.First().Name + " - " + orderedItems.First().Id);
+
+            #endregion
         }
     }
 }
