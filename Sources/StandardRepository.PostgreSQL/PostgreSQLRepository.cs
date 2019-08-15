@@ -84,6 +84,7 @@ namespace StandardRepository.PostgreSQL
             }
         }
 
+        [Obsolete]
         public override async Task<List<T>> SelectMany(Expression<Func<T, bool>> where, int skip = 0, int take = 100,
                                                        Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false)
         {
@@ -117,6 +118,27 @@ namespace StandardRepository.PostgreSQL
             return items;
         }
 
+        public override async Task<List<T>> SelectMany(Expression<Func<T, bool>> where, int skip = 0, int take = 100, bool isIncludeDeleted = false,
+                                                       List<OrderByInfo<T>> orderByInfos = null)
+        {
+            var sb = GetStringBuilderWithSelectFrom();
+
+            var parameters = new List<NpgsqlParameter>();
+            var prmSkip = new NpgsqlParameter<int>(SQLConstants.SKIP_PARAMETER_NAME, NpgsqlDbType.Integer) { TypedValue = skip };
+            parameters.Add(prmSkip);
+            var prmTake = new NpgsqlParameter<int>(SQLConstants.TAKE_PARAMETER_NAME, NpgsqlDbType.Integer) { TypedValue = take };
+            parameters.Add(prmTake);
+            AppendWhere(where, parameters, sb, isIncludeDeleted);
+
+            AppendOrderByFields(orderByInfos, sb);
+
+            sb.Append($"{PostgreSQLConstants.LIMIT} {PostgreSQLConstants.PARAMETER_PRESIGN}{SQLConstants.TAKE_PARAMETER_NAME} {PostgreSQLConstants.OFFSET} {PostgreSQLConstants.PARAMETER_PRESIGN}{SQLConstants.SKIP_PARAMETER_NAME} {Environment.NewLine}");
+
+            var items = await SQLExecutor.ExecuteSqlReturningEntityList<T>(sb.ToString(), parameters);
+            return items;
+        }
+
+        [Obsolete]
         public override async Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, long lastId, int take = 100,
                                                         Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false)
         {
@@ -150,6 +172,27 @@ namespace StandardRepository.PostgreSQL
             return items;
         }
 
+        public override async Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, long lastId, int take = 100, bool isIncludeDeleted = false,
+                                                        List<OrderByInfo<T>> orderByInfos = null)
+        {
+            var sb = GetStringBuilderWithSelectFrom();
+
+            var parameters = new List<NpgsqlParameter>();
+            var prmTake = new NpgsqlParameter<int>(SQLConstants.TAKE_PARAMETER_NAME, NpgsqlDbType.Integer) { TypedValue = take };
+            parameters.Add(prmTake);
+            AppendWhere(where, parameters, sb, isIncludeDeleted);
+
+            sb.Append($" {SQLConstants.AND} {_sqlConstants.IdFieldName} > {lastId}{Environment.NewLine}");
+
+            AppendOrderByFields(orderByInfos, sb);
+
+            sb.Append($"{PostgreSQLConstants.LIMIT} {PostgreSQLConstants.PARAMETER_PRESIGN}{SQLConstants.TAKE_PARAMETER_NAME} {PostgreSQLConstants.OFFSET} 0{Environment.NewLine}");
+
+            var items = await SQLExecutor.ExecuteSqlReturningEntityList<T>(sb.ToString(), parameters);
+            return items;
+        }
+
+        [Obsolete]
         public override async Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, Guid lastUid, int take = 100,
                                                         Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false)
         {
@@ -202,6 +245,45 @@ namespace StandardRepository.PostgreSQL
             return items;
         }
 
+        public override async Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, Guid lastUid, int take = 100, bool isIncludeDeleted = false,
+                                                        List<OrderByInfo<T>> orderByInfos = null)
+        {
+            var sb = GetStringBuilderWithSelectFrom();
+
+            var parameters = new List<NpgsqlParameter>();
+            var prmTake = new NpgsqlParameter<int>(SQLConstants.TAKE_PARAMETER_NAME, NpgsqlDbType.Integer) { TypedValue = take };
+            parameters.Add(prmTake);
+
+            AppendWhere(where, parameters, sb, isIncludeDeleted);
+
+            if (lastUid != Guid.Empty)
+            {
+                var prmLastUid = new NpgsqlParameter<Guid>(SQLConstants.LAST_UID_PARAMETER_NAME, NpgsqlDbType.Uuid) { TypedValue = lastUid };
+                parameters.Add(prmLastUid);
+
+                var schemaName = _entityUtils.GetSchemaName(typeof(T));
+                var tableName = _entityUtils.GetTableName(typeof(T));
+
+                if (where == null && isIncludeDeleted)
+                {
+                    sb.Append($"{SQLConstants.WHERE}");
+                }
+                else
+                {
+                    sb.Append($" {SQLConstants.AND}");
+                }
+
+                sb.Append($" {_sqlConstants.IdFieldName} > ({SQLConstants.SELECT} {tableName}_id {SQLConstants.FROM} {schemaName}.{tableName} {SQLConstants.WHERE} {tableName}_uid = {PostgreSQLConstants.PARAMETER_PRESIGN}{SQLConstants.LAST_UID_PARAMETER_NAME}){Environment.NewLine}");
+            }
+
+            AppendOrderByFields(orderByInfos, sb);
+
+            sb.Append($"{PostgreSQLConstants.LIMIT} {PostgreSQLConstants.PARAMETER_PRESIGN}{SQLConstants.TAKE_PARAMETER_NAME} {PostgreSQLConstants.OFFSET} 0{Environment.NewLine}");
+
+            var items = await SQLExecutor.ExecuteSqlReturningEntityList<T>(sb.ToString(), parameters);
+            return items;
+        }
+
         public override async Task<List<long>> SelectIds(Expression<Func<T, bool>> where, bool isIncludeDeleted = false)
         {
             var sb = new StringBuilder();
@@ -232,11 +314,15 @@ namespace StandardRepository.PostgreSQL
             return result;
         }
 
+        [Obsolete]
         public override async Task<List<T>> SelectAll(Expression<Func<T, bool>> where, Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false)
         {
             var sb = new StringBuilder();
             sb.Append($"{SQLConstants.SELECT} *{Environment.NewLine}");
             sb.Append($"{SQLConstants.FROM} {_sqlConstants.TableFullName}{Environment.NewLine}");
+
+            var parameters = new List<NpgsqlParameter>();
+            AppendWhere(where, parameters, sb, isIncludeDeleted);
 
             var orderColumn = _sqlConstants.IdFieldName;
             if (orderByColumn != null)
@@ -250,13 +336,68 @@ namespace StandardRepository.PostgreSQL
                 ascOrDesc = SQLConstants.ASC;
             }
 
-            var parameters = new List<NpgsqlParameter>();
-
-            AppendWhere(where, parameters, sb, isIncludeDeleted);
             sb.Append($"{SQLConstants.ORDER_BY} {orderColumn} {ascOrDesc}{Environment.NewLine}");
 
             var items = await SQLExecutor.ExecuteSqlReturningEntityList<T>(sb.ToString(), parameters);
             return items;
+        }
+
+        public override async Task<List<T>> SelectAll(Expression<Func<T, bool>> where, bool isIncludeDeleted = false, List<OrderByInfo<T>> orderByInfos = null)
+        {
+            var sb = GetStringBuilderWithSelectFrom();
+
+            var parameters = new List<NpgsqlParameter>();
+            AppendWhere(where, parameters, sb, isIncludeDeleted);
+
+            AppendOrderByFields(orderByInfos, sb);
+
+            var items = await SQLExecutor.ExecuteSqlReturningEntityList<T>(sb.ToString(), parameters);
+            return items;
+        }
+
+        private void AppendOrderByFields(IReadOnlyList<OrderByInfo<T>> orderByInfos, StringBuilder sb)
+        {
+            if (orderByInfos == null
+                || orderByInfos.Count < 1)
+            {
+                return;
+            }
+
+            sb.Append($"{SQLConstants.ORDER_BY} ");
+
+            for (var i = 0; i < orderByInfos.Count; i++)
+            {
+                var orderByInfo = orderByInfos[i];
+
+                var orderColumn = _sqlConstants.IdFieldName;
+                if (orderByInfo.OrderByColumn != null)
+                {
+                    orderColumn = _expressionUtils.GetField(orderByInfo.OrderByColumn.Body);
+                }
+
+                var ascOrDesc = SQLConstants.DESC;
+                if (orderByInfo.IsAscending)
+                {
+                    ascOrDesc = SQLConstants.ASC;
+                }
+
+                sb.Append($"{orderColumn} {ascOrDesc}");
+
+                if (i != orderByInfos.Count - 1)
+                {
+                    sb.Append(", ");
+                }
+            }
+
+            sb.Append(Environment.NewLine);
+        }
+
+        private StringBuilder GetStringBuilderWithSelectFrom()
+        {
+            var sb = new StringBuilder();
+            sb.Append($"{SQLConstants.SELECT} *{Environment.NewLine}");
+            sb.Append($"{SQLConstants.FROM} {_sqlConstants.TableFullName}{Environment.NewLine}");
+            return sb;
         }
     }
 }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using StandardRepository.Helpers;
+using StandardRepository.Models;
 using StandardRepository.Models.Entities;
 using StandardRepository.PostgreSQL.Tests.Base;
 using StandardRepository.PostgreSQL.Tests.Base.Entities;
@@ -68,6 +69,50 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
             AssertCreated(updatedEntity);
             AssertUpdated(updatedEntity);
             AssertDeleteFieldsNull(updatedEntity);
+        }
+
+        [Test]
+        public async Task Repository_Update_Bulk()
+        {
+            // arrange
+            var repository = GetOrganizationRepository();
+            var theCount = 10;
+            var updatedValue = "updated-value";
+
+            var entity = GetOrganization();
+            entity.Description = "test-value-before-bulk-update";
+
+            for (var i = 0; i < theCount; i++)
+            {
+                entity.Uid = Guid.NewGuid();
+                await repository.Insert(CURRENT_USER_ID, entity);
+            }
+
+            // act
+            var result = await repository.UpdateBulk(CURRENT_USER_ID, x => x.IsActive,
+                                                     new List<UpdateInfo<Organization>> { new UpdateInfo<Organization>(x => x.Description, updatedValue) });
+
+            // assert
+            result.ShouldBe(true);
+
+            var updatedEntities = await repository.SelectAll(x => x.Description == updatedValue, false,
+                                                             new List<OrderByInfo<Organization>> { new OrderByInfo<Organization>(x => x.CreatedAt, false) });
+
+            updatedEntities.Count.ShouldBe(theCount);
+            for (var i = 0; i < updatedEntities.Count; i++)
+            {
+                var updatedEntity = updatedEntities[i];
+                updatedEntity.Name.ShouldBe(entity.Name);
+                updatedEntity.Email.ShouldBe(entity.Email);
+                updatedEntity.IsActive.ShouldBe(entity.IsActive);
+                updatedEntity.IsSuperOrganization.ShouldBe(entity.IsSuperOrganization);
+                updatedEntity.ProjectCount.ShouldBe(entity.ProjectCount);
+                updatedEntity.Description.ShouldBe(updatedValue);
+
+                AssertCreated(updatedEntity);
+                AssertUpdated(updatedEntity);
+                AssertDeleteFieldsNull(updatedEntity);
+            }
         }
 
         [Test]
@@ -143,6 +188,46 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
 
             // assert
             result.ShouldBe(theCount + theCount);
+        }
+
+        [Test]
+        public async Task Repository_Count_DISTINCT()
+        {
+            // arrange
+            var repository = GetOrganizationRepository();
+            var theCount = 10;
+            var distinctCount = 1;
+
+            for (var i = 0; i < theCount; i++)
+            {
+                var entity = GetOrganization();
+                entity.Description = "distinct-test";
+                await repository.Insert(CURRENT_USER_ID, entity);
+            }
+
+            // act
+            var distinctCountResult = await repository.Count(x => x.IsActive, false, new List<DistinctInfo<Organization>> { new DistinctInfo<Organization>(x => x.Description) });
+            var countResult = await repository.Count();
+
+            // assert
+            distinctCountResult.ShouldBe(distinctCount);
+            countResult.ShouldBe(theCount);
+
+            // arrange again
+            for (var i = 0; i < theCount; i++)
+            {
+                var entity = GetOrganization();
+                entity.Description = "other-scenario";
+                await repository.Insert(CURRENT_USER_ID, entity);
+            }
+
+            // act again
+            distinctCountResult = await repository.Count(x => x.IsActive, false, new List<DistinctInfo<Organization>> { new DistinctInfo<Organization>(x => x.Description) });
+            countResult = await repository.Count();
+
+            // assert
+            countResult.ShouldBe(theCount + theCount);
+            distinctCountResult.ShouldBe(distinctCount + distinctCount);
         }
 
         [Test]
@@ -447,7 +532,7 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
             }
 
             // act
-            var items = await repository.SelectAfter(x => x.Id > filter, lastId);
+            var items = await repository.SelectAfter(x => x.Id > filter, lastId, 100, false);
 
             // assert
             items.ShouldNotBeNull();
@@ -477,7 +562,7 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
             }
 
             // act
-            var items = await repository.SelectAfter(x => x.Id > filter && x.IsActive, lastId, 2);
+            var items = await repository.SelectAfter(x => x.Id > filter && x.IsActive, lastId, 2, false);
 
             // assert
             items.ShouldNotBeNull();
@@ -506,7 +591,7 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
             }
 
             // act
-            var items = await repository.SelectMany(x => x.Id > filter && x.IsActive);
+            var items = await repository.SelectMany(x => x.Id > filter && x.IsActive, 0, 100, false);
 
             // assert
             items.ShouldNotBeNull();
@@ -535,7 +620,8 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
             }
 
             // act
-            var items = await repository.SelectMany(x => x.Id > filter && x.IsActive, 2, 2, x => x.Id);
+            var items = await repository.SelectMany(x => x.Id > filter && x.IsActive, 2, 2, false,
+                                                    new List<OrderByInfo<Organization>> { new OrderByInfo<Organization>(x => x.Id) });
 
             // assert
             items.ShouldNotBeNull();
@@ -564,7 +650,8 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
             }
 
             // act
-            var items = await repository.SelectMany(x => x.Id > filter && x.IsActive, 2, 2, x => x.Id, false);
+            var items = await repository.SelectMany(x => x.Id > filter && x.IsActive, 2, 2, false,
+                                                    new List<OrderByInfo<Organization>> { new OrderByInfo<Organization>(x => x.Id, false) });
 
             // assert
             items.ShouldNotBeNull();
@@ -572,6 +659,42 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
 
             items.First().Id.ShouldBe(8);
             items.Last().Id.ShouldBe(7);
+        }
+
+        [Test]
+        public async Task Repository_SelectMany_3()
+        {
+            // arrange
+            var repository = GetOrganizationRepository();
+            var theCount = 10;
+            var filter = 3;
+
+            for (var i = 0; i < theCount; i++)
+            {
+                var entity = GetOrganization();
+                entity.Name = "name " + i;
+                await repository.Insert(CURRENT_USER_ID, entity);
+            }
+
+            // act
+            var items = await repository.SelectMany(x => x.Id > filter && x.IsActive, 2, 2, false,
+                                                    new List<OrderByInfo<Organization>>
+                                                    {
+                                                        new OrderByInfo<Organization>(x => x.Name, false),
+                                                        new OrderByInfo<Organization>(x => x.Id)
+                                                    });
+
+            // assert
+            items.ShouldNotBeNull();
+            items.Count.ShouldBe(2);
+
+            var first = items.First();
+            first.Id.ShouldBe(8);
+            first.Name.ShouldBe("name 7");
+
+            var last = items.Last();
+            last.Id.ShouldBe(7);
+            last.Name.ShouldBe("name 6");
         }
 
         [Test]
