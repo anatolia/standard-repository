@@ -1,6 +1,6 @@
 # standard-repository
 
-this project is a simple alternative for entity framework...
+this project is a simple alternative for entity framework code first...
 
 with StandardRepository;
 
@@ -14,6 +14,11 @@ and also soft delete logic.
     Task<bool> Delete(long currentUserId, long id);
     Task<bool> UndoDelete(long currentUserId, long id);
     Task<bool> HardDelete(long currentUserId, long id);
+
+but there is no support for having and group by...
+
+and for complex queries it suggests you to use stored procedures.
+
     
 ## You can install this package via NuGet
     Install-Package StandardRepository.PostgreSQL
