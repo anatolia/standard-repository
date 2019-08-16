@@ -9,7 +9,7 @@
     <PackageLicenseExpression></PackageLicenseExpression>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <Description>a postresql data access layer which comes with record revision history and soft delete logic.</Description>
-    <Version>1.0.1.9</Version>
+    <Version>1.0.1.12</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
@@ -56,7 +56,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Npgsql" Version="4.0.7" />
+    <PackageReference Include="Npgsql" Version="4.0.9" />
+    <PackageReference Include="StandardRepository" Version="1.0.1.12" />
   </ItemGroup>
 
   <ItemGroup>
@@ -64,9 +65,5 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\StandardRepository\StandardRepository.csproj" />
   </ItemGroup>
 </Project>

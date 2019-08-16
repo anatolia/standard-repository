@@ -30,8 +30,8 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
                 organizationRepository.SetSqlExecutorForTransaction(cnn);
                 projectRepository.SetSqlExecutorForTransaction(cnn);
 
-                var orgIdOther = organizationRepository.Insert(1, organization).Result;
-                var projectIdOther = projectRepository.Insert(1, project).Result;
+                var orgIdOther = await organizationRepository.Insert(1, organization);
+                var projectIdOther = await projectRepository.Insert(1, project);
 
                 return true;
 
@@ -61,12 +61,9 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
                     organizationRepository.SetSqlExecutorForTransaction(cnn);
                     projectRepository.SetSqlExecutorForTransaction(cnn);
 
-                    var orgIdOther = organizationRepository.Insert(1, organization).Result;
+                    var orgIdOther = await organizationRepository.Insert(1, organization);
 
                     throw new TransactionAbortedException();
-
-                    var projectIdOther = projectRepository.Insert(1, project).Result;
-                    return true;
 
                 }).Result;
             }

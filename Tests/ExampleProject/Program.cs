@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
+
 using Npgsql;
+using StandardRepository.Models;
 using StandardRepository.PostgreSQL;
 using StandardRepository.PostgreSQL.Factories;
 using StandardRepository.PostgreSQL.Helpers;
 
 using ExampleProject.Entities;
 using ExampleProject.Repositories;
-using StandardRepository.Models;
 
 namespace ExampleProject
 {
@@ -81,7 +81,7 @@ namespace ExampleProject
                     project.OrganizationUid = organization.Uid;
                     project.OrganizationName = organization.Name;
 
-                    var projectIdOther = projectRepository.Insert(1, project).Result;
+                    var projectIdOther = await projectRepository.Insert(1, project);
 
                     return true;
 
