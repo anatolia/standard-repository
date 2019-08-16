@@ -26,13 +26,13 @@ namespace StandardRepository.Helpers.SqlExecutor
         }
 
         public TParameter AddParameter<TValue>(TCommand command, string parameterName, TValue parameterValue,
-                                                DbType? parameterType = null, int? size = null, byte? precision = null, byte? scale = null)
+                                               DbType? parameterType = null, int? size = null, byte? precision = null, byte? scale = null)
         {
             return AddParameter(command.Parameters, parameterName, parameterValue, parameterType, size, precision, scale);
         }
 
         public TParameter AddParameter<TValue>(DbParameterCollection parameters, string parameterName, TValue parameterValue,
-                                                DbType? parameterType = null, int? size = null, byte? precision = null, byte? scale = null)
+                                               DbType? parameterType = null, int? size = null, byte? precision = null, byte? scale = null)
         {
             var parameter = CreateParameter(parameterName, parameterValue, parameterType, size, precision, scale);
             parameters.Add(parameter);
@@ -40,7 +40,7 @@ namespace StandardRepository.Helpers.SqlExecutor
         }
 
         public TParameter AddParameter<TValue>(ICollection<TParameter> parameters, string parameterName, TValue parameterValue,
-                                                DbType? parameterType = null, int? size = null, byte? precision = null, byte? scale = null)
+                                               DbType? parameterType = null, int? size = null, byte? precision = null, byte? scale = null)
         {
             var parameter = CreateParameter(parameterName, parameterValue, parameterType, size, precision, scale);
             parameters.Add(parameter);
@@ -151,6 +151,34 @@ namespace StandardRepository.Helpers.SqlExecutor
             }
 
             return entity;
+        }
+
+        protected async Task<List<T>> ExecuteStoredProcedureReturningEntityList<T>(TCommand command, string storedProcedureName, List<TParameter> parameters) where T : new()
+        {
+            var items = new List<T>();
+            
+            var properties = typeof(T).GetProperties();
+            var entityTypeName = typeof(T).Name;
+
+            command.CommandType = CommandType.StoredProcedure;
+            command.CommandText = storedProcedureName;
+
+            AddParametersRange(command, parameters);
+
+            using (var reader = await command.ExecuteReaderAsync())
+            {
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        var entity = new T();
+                        _entityUtils.MapFields(reader, properties, entityTypeName, entity);
+                        items.Add(entity);
+                    }
+                }
+            }
+
+            return items;
         }
 
         protected async Task<T> ExecuteSqlReturningValue<T>(TCommand command, string sql, List<TParameter> parameters)
