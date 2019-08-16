@@ -29,6 +29,7 @@ namespace StandardRepository.Helpers.SqlExecutor
         Task ExecuteStoredProcedure(string storedProcedureName, List<TParameter> parameters);
         Task<T> ExecuteStoredProcedureReturningValue<T>(string storedProcedureName, IEnumerable<TParameter> parameters);
         Task<T> ExecuteStoredProcedureReturningEntity<T>(string storedProcedureName, List<TParameter> parameters) where T : BaseEntity, new();
+        Task<List<T>> ExecuteStoredProcedureReturningEntityList<T>(string storedProcedureName, List<TParameter> parameters) where T : BaseEntity, new();
         
         Task<T> ExecuteSqlReturningValue<T>(string sql, List<TParameter> parameters);
         Task<List<T>> ExecuteSqlReturningList<T>(string sql, List<TParameter> parameters);

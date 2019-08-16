@@ -94,6 +94,25 @@ namespace StandardRepository.Helpers.SqlExecutor
             }
         }
 
+        public async Task<List<T>> ExecuteStoredProcedureReturningEntityList<T>(string storedProcedureName, List<TParameter> parameters = null) where T : BaseEntity, new()
+        {
+            if (_connection != null)
+            {
+                using (var command = new TCommand())
+                {
+                    command.Connection = _connection;
+                    return await ExecuteStoredProcedureReturningEntityList<T>(command, storedProcedureName, parameters);
+                }
+            }
+
+            using (var connection = _connectionFactory.Create())
+            using (var command = new TCommand())
+            {
+                command.Connection = connection;
+                return await ExecuteStoredProcedureReturningEntityList<T>(command, storedProcedureName, parameters);
+            }
+        }
+
         public async Task ExecuteSql(string sql, List<TParameter> parameters)
         {
             if (_connection != null)
