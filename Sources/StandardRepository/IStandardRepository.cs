@@ -62,18 +62,11 @@ namespace StandardRepository
         /// <returns></returns>
         Task<T> Select(Expression<Func<T, bool>> where, bool isIncludeDeleted = false);
         Task<List<T>> SelectMany(IEnumerable<long> ids, bool isIncludeDeleted = false);
-        [Obsolete]
-        Task<List<T>> SelectMany(Expression<Func<T, bool>> where, int skip = 0, int take = 100, Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false);
         Task<List<T>> SelectMany(Expression<Func<T, bool>> where, int skip = 0, int take = 100, bool isIncludeDeleted = false, List<OrderByInfo<T>> orderByInfos = null);
-        [Obsolete]
-        Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, long lastId, int take = 100, Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false);
         Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, long lastId, int take = 100, bool isIncludeDeleted = false, List<OrderByInfo<T>> orderByInfos = null);
-        [Obsolete]
-        Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, Guid lastUid, int take = 100, Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false);
         Task<List<T>> SelectAfter(Expression<Func<T, bool>> where, Guid lastUid, int take = 100, bool isIncludeDeleted = false, List<OrderByInfo<T>> orderByInfos = null);
         Task<List<long>> SelectIds(Expression<Func<T, bool>> where, bool isIncludeDeleted = false);
-        [Obsolete]
-        Task<List<T>> SelectAll(Expression<Func<T, bool>> where, Expression<Func<T, object>> orderByColumn = null, bool isAscending = true, bool isIncludeDeleted = false);
+        
         Task<List<T>> SelectAll(Expression<Func<T, bool>> where, bool isIncludeDeleted = false, List<OrderByInfo<T>> orderByInfos = null);
 
         Task<List<EntityRevision<T>>> SelectRevisions(long id);
