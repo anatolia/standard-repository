@@ -571,10 +571,10 @@ namespace StandardRepository.PostgreSQL.DbGenerator
                 if (field.Name == "row"
                     || field.Name == "column")
                 {
-                    throw new ArgumentException(entityType.Name + " has not supported fieldname! (" + field.Name + ")");
+                    throw new ArgumentException(entityType.Name + " has not supported field name! (" + field.Name + ")");
                 }
 
-                var fieldName = _entityUtils.GetFieldNameFromPropertyName(field.Name);
+                var fieldName = field.Name.GetDelimitedName();
                 var notNullText = GetNotNullStringIfFieldNullable(field);
 
                 if (field.Name == "IP")

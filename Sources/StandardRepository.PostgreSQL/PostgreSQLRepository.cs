@@ -171,11 +171,11 @@ namespace StandardRepository.PostgreSQL
 
             if (isIncludeDeleted)
             {
-                sb.Append($"{SQLConstants.WHERE} {_entityUtils.GetFieldNameFromPropertyName(nameof(BaseEntity.IsDeleted))} = true");
+                sb.Append($"{SQLConstants.WHERE} is_deleted = true");
             }
             else
             {
-                sb.Append($"{SQLConstants.WHERE} {_entityUtils.GetFieldNameFromPropertyName(nameof(BaseEntity.IsDeleted))} = false");
+                sb.Append($"{SQLConstants.WHERE} is_deleted = false");
             }
 
             var parameters = new List<NpgsqlParameter>();
@@ -223,15 +223,7 @@ namespace StandardRepository.PostgreSQL
                 var orderColumn = _sqlConstants.IdFieldName;
                 if (orderByInfo.OrderByColumn != null)
                 {
-                    if (FieldNameCache.ContainsKey(orderByInfo.OrderByColumn.Body))
-                    {
-                        orderColumn = _expressionUtils.GetFieldName(orderByInfo.OrderByColumn.Body);
-                        FieldNameCache.Add(orderByInfo.OrderByColumn.Body, orderColumn);
-                    }
-                    else
-                    {
-                        orderColumn = FieldNameCache[orderByInfo.OrderByColumn.Body];
-                    }
+                    orderColumn = GetFieldNameCached(orderByInfo.OrderByColumn.Body);
                 }
 
                 var ascOrDesc = SQLConstants.DESC;

@@ -11,16 +11,16 @@ namespace StandardRepository.Helpers
     public class EntityUtils
     {
         private readonly TypeLookup _typeLookup;
+        public Dictionary<string, string> FieldNameCache { get; set; }
 
         public EntityUtils(TypeLookup typeLookup, params Assembly[] assemblyOfEntities)
         {
             _typeLookup = typeLookup;
             AssembliesForEntities = assemblyOfEntities;
+            FieldNameCache = new Dictionary<string, string>();
         }
 
         public Assembly[] AssembliesForEntities { get; }
-
-        public virtual string GetFieldNameFromPropertyName(string propertyName, string entityTypeName = null) => propertyName.GetFieldNameFromPropertyName(entityTypeName);
 
         #region Name Helpers
         public string GetSchemaName(Type entityType)
@@ -37,7 +37,7 @@ namespace StandardRepository.Helpers
 
         public string GetTableName(Type entityType)
         {
-            return GetFieldNameFromPropertyName(entityType.Name);
+            return entityType.Name.GetDelimitedName();
         }
 
         public string GetTableFullName(Type entityType)
@@ -47,7 +47,7 @@ namespace StandardRepository.Helpers
 
         public string GetParameterNameFromPropertyName(string propertyName)
         {
-            return $"prm_{GetFieldNameFromPropertyName(propertyName)}";
+            return $"prm_{propertyName.GetDelimitedName()}";
         }
         #endregion
 
@@ -140,13 +140,26 @@ namespace StandardRepository.Helpers
         }
         #endregion
 
-        public void MapFields<T>(IDataRecord reader, PropertyInfo[] properties, string entityTypeName,
-                                 T entity) where T : new()
+        public void MapFields<T>(IDataRecord reader, PropertyInfo[] properties, string entityTypeName, T entity) where T : new()
         {
             for (var i = 0; i < reader.FieldCount; i++)
             {
                 var fieldName = reader.GetName(i);
-                var prop = properties.FirstOrDefault(x => GetFieldNameFromPropertyName(x.Name, entityTypeName) == fieldName);
+
+                var fieldNameCacheKey = entityTypeName + fieldName;
+
+                string propName;
+                if (FieldNameCache.ContainsKey(fieldNameCacheKey))
+                {
+                    propName = FieldNameCache[fieldNameCacheKey];
+                }
+                else
+                {
+                    propName = fieldName.GetPropNameFromFieldName(entityTypeName);
+                    FieldNameCache.Add(fieldNameCacheKey, propName);
+                }
+
+                var prop = properties.FirstOrDefault(x => x.Name == propName);
                 if (prop == null)
                 {
                     continue;
@@ -165,7 +178,7 @@ namespace StandardRepository.Helpers
         public void MapFieldsRevision<T>(IDataRecord reader, PropertyInfo[] properties, string entityTypeName,
                                          EntityRevision<T> revision) where T : BaseEntity, new()
         {
-            revision.Id = Convert.ToInt64(reader[entityTypeName.GetFieldNameFromPropertyName() + "_id"]);
+            revision.Id = Convert.ToInt64(reader[entityTypeName.GetDelimitedName() + "_id"]);
             revision.Revision = Convert.ToInt32(reader["revision"]);
             revision.RevisionedBy = Convert.ToInt64(reader["revisioned_by"]);
             revision.RevisionedAt = Convert.ToDateTime(reader["revisioned_at"]);

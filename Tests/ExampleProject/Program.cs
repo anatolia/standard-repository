@@ -121,6 +121,8 @@ namespace ExampleProject
             Console.WriteLine("name asc ordered, first item > " + orderedItems.First().Name + " - " + orderedItems.First().Id);
 
             #endregion
+
+            Console.Read();
         }
     }
 }

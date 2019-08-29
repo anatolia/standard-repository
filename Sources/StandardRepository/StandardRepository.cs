@@ -88,8 +88,10 @@ namespace StandardRepository
 
         public async Task InsertBulk(long currentUserId, IEnumerable<T> entities)
         {
-            foreach (var entity in entities)
+            var list = entities.ToList();
+            for (var i = 0; i < list.Count; i++)
             {
+                var entity = list[i];
                 await Insert(currentUserId, entity);
             }
         }
@@ -142,7 +144,8 @@ namespace StandardRepository
                     continue;
                 }
 
-                var updateColumn = _expressionUtils.GetFieldName(updateInfo.UpdateColumn.Body);
+                var updateColumn = GetFieldNameCached(updateInfo.UpdateColumn.Body);
+
                 SQLExecutor.AddParameter(parameters, $"{_sqlConstants.ParameterSign}{updateColumn}", updateInfo.Value);
 
                 sb.Append($"{updateColumn} = {_sqlConstants.ParameterSign}{updateColumn}");
@@ -169,7 +172,7 @@ namespace StandardRepository
                 throw new SecurityException("updateable fields not defined for entity");
             }
 
-            var prmName = _sqlConstants.ParameterSign + _entityUtils.GetFieldNameFromPropertyName(fieldName);
+            var prmName = _sqlConstants.ParameterSign + fieldName.GetDelimitedName();
             var parameters = GetParametersForId(id);
             parameters.Add(SQLExecutor.CreateParameter(prmName, value));
 
@@ -241,7 +244,7 @@ namespace StandardRepository
 
             if (!isIncludeDeleted)
             {
-                sb.Append($"{_entityUtils.GetFieldNameFromPropertyName(nameof(BaseEntity.IsDeleted))} = false AND ");
+                sb.Append("is_deleted = false AND ");
             }
 
             var idsInString = string.Join("::bigint,", idList);
@@ -309,7 +312,7 @@ namespace StandardRepository
                     var distinctColumn = _sqlConstants.IdFieldName;
                     if (distinctInfo.DistinctColumn != null)
                     {
-                        distinctColumn = _expressionUtils.GetFieldName(distinctInfo.DistinctColumn.Body);
+                        distinctColumn = GetFieldNameCached(distinctInfo.DistinctColumn.Body);
                     }
 
                     sb.Append($"{distinctColumn}");
@@ -343,7 +346,7 @@ namespace StandardRepository
                 throw new ArgumentException("the field to get the max is not specified!");
             }
 
-            var maxColumnField = _expressionUtils.GetFieldName(maxColumn.Body);
+            var maxColumnField = GetFieldNameCached(maxColumn.Body);
 
             var parameters = new List<TParameter>();
             var sb = GetMaxColumnQuery(where, maxColumnField, parameters, isIncludeDeleted);
@@ -359,7 +362,7 @@ namespace StandardRepository
                 throw new ArgumentNullException(nameof(maxColumn));
             }
 
-            var maxColumnField = _expressionUtils.GetFieldName(maxColumn.Body);
+            var maxColumnField = GetFieldNameCached(maxColumn.Body);
 
             var parameters = new List<TParameter>();
             var sb = GetMaxColumnQuery(where, maxColumnField, parameters, isIncludeDeleted);
@@ -375,7 +378,7 @@ namespace StandardRepository
                 throw new ArgumentNullException(nameof(maxColumn));
             }
 
-            var maxColumnField = _expressionUtils.GetFieldName(maxColumn.Body);
+            var maxColumnField = GetFieldNameCached(maxColumn.Body);
 
             var parameters = new List<TParameter>();
             var sb = GetMaxColumnQuery(where, maxColumnField, parameters, isIncludeDeleted);
@@ -391,7 +394,7 @@ namespace StandardRepository
                 throw new ArgumentException("the field to get the min is not specified!");
             }
 
-            var minColumnField = _expressionUtils.GetFieldName(minColumn.Body);
+            var minColumnField = GetFieldNameCached(minColumn.Body);
 
             var parameters = new List<TParameter>();
             var sb = GetMinColumnQuery(where, minColumnField, parameters, isIncludeDeleted);
@@ -407,7 +410,7 @@ namespace StandardRepository
                 throw new ArgumentException("the field to get the min is not specified!");
             }
 
-            var minColumnField = _expressionUtils.GetFieldName(minColumn.Body);
+            var minColumnField = GetFieldNameCached(minColumn.Body);
 
             var parameters = new List<TParameter>();
             var sb = GetMinColumnQuery(where, minColumnField, parameters, isIncludeDeleted);
@@ -423,7 +426,7 @@ namespace StandardRepository
                 throw new ArgumentException("the field to get the min is not specified!");
             }
 
-            var minColumnField = _expressionUtils.GetFieldName(minColumn.Body);
+            var minColumnField = GetFieldNameCached(minColumn.Body);
 
             var parameters = new List<TParameter>();
             var sb = GetMinColumnQuery(where, minColumnField, parameters, isIncludeDeleted);
@@ -439,7 +442,7 @@ namespace StandardRepository
                 throw new ArgumentException("the field to get the sum is not specified!");
             }
 
-            var sumColumnField = _expressionUtils.GetFieldName(sumColumn.Body);
+            var sumColumnField = GetFieldNameCached(sumColumn.Body);
 
             var parameters = new List<TParameter>();
             var sb = GetSumColumnQuery(where, sumColumnField, parameters, isIncludeDeleted);
@@ -455,7 +458,7 @@ namespace StandardRepository
                 throw new ArgumentException("the field to get the sum is not specified!");
             }
 
-            var sumColumnField = _expressionUtils.GetFieldName(sumColumn.Body);
+            var sumColumnField = GetFieldNameCached(sumColumn.Body);
 
             var parameters = new List<TParameter>();
             var sb = GetSumColumnQuery(where, sumColumnField, parameters, isIncludeDeleted);
@@ -471,7 +474,7 @@ namespace StandardRepository
                 throw new ArgumentException("the field to get the sum is not specified!");
             }
 
-            var sumColumnField = _expressionUtils.GetFieldName(sumColumn.Body);
+            var sumColumnField = GetFieldNameCached(sumColumn.Body);
 
             var parameters = new List<TParameter>();
             var sb = GetSumColumnQuery(where, sumColumnField, parameters, isIncludeDeleted);
@@ -481,6 +484,7 @@ namespace StandardRepository
         }
 
         #region Helpers
+
         private TParameter[] GetParameterInfoFromField(T entity, PropertyInfo field)
         {
             var prms = new List<TParameter>();
@@ -568,6 +572,22 @@ namespace StandardRepository
             AppendWhere(where, parameters, sb, isIncludeDeleted);
 
             return sb.ToString();
+        }
+
+        protected string GetFieldNameCached(Expression columnExpression)
+        {
+            string fieldName;
+            if (FieldNameCache.ContainsKey(columnExpression))
+            {
+                fieldName = FieldNameCache[columnExpression];
+            }
+            else
+            {
+                fieldName = _expressionUtils.GetFieldName(columnExpression);
+                FieldNameCache.Add(columnExpression, fieldName);
+            }
+
+            return fieldName;
         }
 
         #endregion
