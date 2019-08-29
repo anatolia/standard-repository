@@ -74,7 +74,7 @@ namespace StandardRepository.PostgreSQL.Tests.Base
         public OrganizationRepository GetOrganizationRepository()
         {
             var postgreSQLTypeLookup = GetTypeLookup();
-            var entityUtils = GetEntityUtils(postgreSQLTypeLookup);
+            var entityUtils = GetEntityUtils(postgreSQLTypeLookup, Assembly.GetExecutingAssembly());
             var sqlExecutor = GetSQLExecutor(GetTestDBName());
             var repository = new OrganizationRepository(postgreSQLTypeLookup, new PostgreSQLConstants<Organization>(entityUtils), entityUtils,
                                                         new PostgreSQLExpressionUtils(), sqlExecutor, new List<string>());
@@ -85,7 +85,7 @@ namespace StandardRepository.PostgreSQL.Tests.Base
         public ProjectRepository GetProjectRepository()
         {
             var postgreSQLTypeLookup = GetTypeLookup();
-            var entityUtils = GetEntityUtils(postgreSQLTypeLookup);
+            var entityUtils = GetEntityUtils(postgreSQLTypeLookup, Assembly.GetExecutingAssembly());
             var sqlExecutor = GetSQLExecutor(GetTestDBName());
             var repository = new ProjectRepository(postgreSQLTypeLookup, new PostgreSQLConstants<Project>(entityUtils), entityUtils,
                                                    new PostgreSQLExpressionUtils(), sqlExecutor, new List<string>());

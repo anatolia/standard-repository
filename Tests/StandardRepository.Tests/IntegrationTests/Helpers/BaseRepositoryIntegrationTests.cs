@@ -19,9 +19,9 @@ namespace StandardRepository.Tests.IntegrationTests.Helpers
             return $"test_db_{testMethodName.ToLowerInvariant()}_{postfix}";
         }
 
-        public EntityUtils GetEntityUtils(TypeLookup typeLookup)
+        public EntityUtils GetEntityUtils(TypeLookup typeLookup, Assembly assemblyOfEntities)
         {
-            return new EntityUtils(typeLookup, Assembly.GetExecutingAssembly());
+            return new EntityUtils(typeLookup, assemblyOfEntities);
         }
 
         public ConnectionSettings GetConnectionSettings(string dbName = null)

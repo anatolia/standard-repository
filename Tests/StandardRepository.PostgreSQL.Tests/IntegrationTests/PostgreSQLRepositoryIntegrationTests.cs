@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using NUnit.Framework;
 using Shouldly;
+
 using StandardRepository.Helpers;
 using StandardRepository.Models;
 using StandardRepository.Models.Entities;
@@ -815,19 +817,21 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
         public async Task Repository_Parallel_For()
         {
             // arrange
-            var repository = GetOrganizationRepository();
             var theCount = 100;
+            var entity = GetOrganization();
 
             // act
             Parallel.For(0, theCount, async x =>
             {
-                var entity = GetOrganization();
                 entity.ProjectCount += 5;
+
+                var repository = GetOrganizationRepository();
                 await repository.Insert(CURRENT_USER_ID, entity);
             });
 
             // assert
-            var result = await repository.Count();
+            var organizationRepository = GetOrganizationRepository();
+            var result = await organizationRepository.Count();
             result.ShouldBe(theCount);
         }
 
