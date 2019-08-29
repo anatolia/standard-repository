@@ -42,7 +42,7 @@ namespace StandardRepository.Helpers
                 return name.ToLowerInvariant();
             }
 
-            var regex = new Regex(@"([A-Z]+[a-z]*)|(\d+)");
+            var regex = new Regex(@"([A-Z]+[a-z]*)|(\d+)", RegexOptions.Compiled);
             var matches = regex.Matches(name);
             var builder = new StringBuilder();
             foreach (var item in matches)

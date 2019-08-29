@@ -63,84 +63,84 @@ namespace StandardRepository.PostgreSQL.Tests.UnitTests
         public void ExpressionUtils_GetField_int()
         {
             Expression<Func<Organization, int>> expression = x => x.ProjectCount;
-            Assert.AreEqual("project_count", SystemUnderTest.GetField(expression.Body));
+            Assert.AreEqual("project_count", SystemUnderTest.GetFieldName(expression.Body));
         }
 
         [Test]
         public void ExpressionUtils_GetField_DateTime()
         {
             Expression<Func<Organization, DateTime>> expression = x => x.StartDate;
-            Assert.AreEqual("start_date", SystemUnderTest.GetField(expression.Body));
+            Assert.AreEqual("start_date", SystemUnderTest.GetFieldName(expression.Body));
         }
 
         [Test]
         public void ExpressionUtils_GetField_String()
         {
             Expression<Func<Organization, string>> expression = x => x.Email;
-            Assert.AreEqual("email", SystemUnderTest.GetField(expression.Body));
+            Assert.AreEqual("email", SystemUnderTest.GetFieldName(expression.Body));
         }
 
         [Test]
         public void ExpressionUtils_GetField_Id()
         {
             Expression<Func<Organization, long>> expression = x => x.Id;
-            Assert.AreEqual("organization_id", SystemUnderTest.GetField(expression.Body));
+            Assert.AreEqual("organization_id", SystemUnderTest.GetFieldName(expression.Body));
         }
 
         [Test]
         public void ExpressionUtils_GetField_Child_Id()
         {
             Expression<Func<Project, long>> expression = x => x.OrganizationId;
-            Assert.AreEqual("organization_id", SystemUnderTest.GetField(expression.Body));
+            Assert.AreEqual("organization_id", SystemUnderTest.GetFieldName(expression.Body));
         }
 
         [Test]
         public void ExpressionUtils_GetField_Uid()
         {
             Expression<Func<Organization, Guid>> expression = x => x.Uid;
-            Assert.AreEqual("organization_uid", SystemUnderTest.GetField(expression.Body));
+            Assert.AreEqual("organization_uid", SystemUnderTest.GetFieldName(expression.Body));
         }
 
         [Test]
         public void ExpressionUtils_GetField_Child_Uid()
         {
             Expression<Func<Project, Guid>> expression = x => x.OrganizationUid;
-            Assert.AreEqual("organization_uid", SystemUnderTest.GetField(expression.Body));
+            Assert.AreEqual("organization_uid", SystemUnderTest.GetFieldName(expression.Body));
         }
 
         [Test]
         public void ExpressionUtils_GetField_Name()
         {
             Expression<Func<Organization, string>> expression = x => x.Name;
-            Assert.AreEqual("organization_name", SystemUnderTest.GetField(expression.Body));
+            Assert.AreEqual("organization_name", SystemUnderTest.GetFieldName(expression.Body));
         }
 
         [Test]
         public void ExpressionUtils_GetField_Child_Name()
         {
             Expression<Func<Project, string>> expression = x => x.OrganizationName;
-            Assert.AreEqual("organization_name", SystemUnderTest.GetField(expression.Body));
+            Assert.AreEqual("organization_name", SystemUnderTest.GetFieldName(expression.Body));
         }
 
         [Test]
         public void ExpressionUtils_GetField_decimal()
         {
             Expression<Func<Project, decimal>> expression = x => x.Cost;
-            Assert.AreEqual("cost", SystemUnderTest.GetField(expression.Body));
+            Assert.AreEqual("cost", SystemUnderTest.GetFieldName(expression.Body));
         }
 
         [Test]
         public void ExpressionUtils_GetField_long_nullable()
         {
             Expression<Func<Project, long?>> expression = x => x.DeletedBy;
-            Assert.AreEqual("deleted_by", SystemUnderTest.GetField(expression.Body));
+            Assert.AreEqual("deleted_by", SystemUnderTest.GetFieldName(expression.Body));
         }
 
         [Test]
         public void ExpressionUtils_GetField_DateTime_nullable()
         {
             Expression<Func<Project, DateTime?>> expression = x => x.DeletedAt;
-            Assert.AreEqual("deleted_at", SystemUnderTest.GetField(expression.Body));
+            Assert.AreEqual("deleted_at", SystemUnderTest.GetFieldName(expression.Body));
         }
 
         [Test]
