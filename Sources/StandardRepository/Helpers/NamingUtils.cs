@@ -9,6 +9,8 @@ namespace StandardRepository.Helpers
 {
     public static class NamingUtils
     {
+        private static readonly Regex DelimitedNameRegex = new Regex(@"([A-Z]+[a-z]*)|(\d+)", RegexOptions.Compiled);
+
         public static string GetFieldNameFromPropertyName(this string propertyName, string entityTypeName = null)
         {
             if (string.IsNullOrWhiteSpace(entityTypeName))
@@ -41,9 +43,8 @@ namespace StandardRepository.Helpers
             {
                 return name.ToLowerInvariant();
             }
-
-            var regex = new Regex(@"([A-Z]+[a-z]*)|(\d+)", RegexOptions.Compiled);
-            var matches = regex.Matches(name);
+            
+            var matches = DelimitedNameRegex.Matches(name);
             var builder = new StringBuilder();
             foreach (var item in matches)
             {

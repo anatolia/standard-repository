@@ -11,16 +11,25 @@ namespace StandardRepository.Helpers
     public class EntityUtils
     {
         private readonly TypeLookup _typeLookup;
-        public Dictionary<string, string> FieldNameCache { get; set; }
+
+        public Dictionary<string, string> FieldNameCache { get; }
+        public Dictionary<Type, PropertyInfo[]> AllPropertiesCache { get; }
+        public PropertyInfo[] BaseProperties { get; }
+        public Assembly[] AssembliesForEntities { get; }
+
+        public List<Type> EntityTypes { get; }
 
         public EntityUtils(TypeLookup typeLookup, params Assembly[] assemblyOfEntities)
         {
             _typeLookup = typeLookup;
+
             AssembliesForEntities = assemblyOfEntities;
             FieldNameCache = new Dictionary<string, string>();
-        }
+            AllPropertiesCache = new Dictionary<Type, PropertyInfo[]>();
+            BaseProperties = GetBaseProperties();
 
-        public Assembly[] AssembliesForEntities { get; }
+            EntityTypes = GetEntityTypes();
+        }
 
         #region Name Helpers
         public string GetSchemaName(Type entityType)
@@ -44,21 +53,22 @@ namespace StandardRepository.Helpers
         {
             return $"{GetSchemaName(entityType)}.{GetTableName(entityType)}";
         }
-
-        public string GetParameterNameFromPropertyName(string propertyName)
-        {
-            return $"prm_{propertyName.GetDelimitedName()}";
-        }
         #endregion
 
         #region Property Helpers
         public PropertyInfo[] GetAllProperties(Type entityType)
         {
+            if (AllPropertiesCache.ContainsKey(entityType))
+            {
+                return AllPropertiesCache[entityType];
+            }
+
             var fields = entityType.GetProperties()
                                    .Where(x => x.PropertyType.IsPublic
                                                && (_typeLookup.HasDbType(x.PropertyType)
                                                    || x.PropertyType.BaseType == typeof(BaseEntity))).ToArray();
 
+            AllPropertiesCache.Add(entityType, fields);
             return fields;
         }
 
@@ -73,7 +83,7 @@ namespace StandardRepository.Helpers
             return fields;
         }
 
-        public PropertyInfo[] GetBaseProperties()
+        private PropertyInfo[] GetBaseProperties()
         {
             var baseFields = typeof(BaseEntity).GetProperties()
                                                .Where(x => _typeLookup.HasDbType(x.PropertyType)
@@ -84,10 +94,10 @@ namespace StandardRepository.Helpers
         public List<Type> GetRelatedEntityTypes(Type entityType)
         {
             var entityTypes = new List<Type>();
-
-            var entities = GetEntityTypes();
-            foreach (var entity in entities)
+            
+            for (var i = 0; i < EntityTypes.Count; i++)
             {
+                var entity = EntityTypes[i];
                 var fields = GetAllProperties(entity);
 
                 if (fields.Any(x => x.Name == entityType.Name + "Id")
@@ -101,7 +111,7 @@ namespace StandardRepository.Helpers
             return entityTypes;
         }
 
-        public List<Type> GetEntityTypes()
+        private List<Type> GetEntityTypes()
         {
             var entityTypes = new List<Type>();
 
@@ -114,6 +124,8 @@ namespace StandardRepository.Helpers
 
                 entityTypes.AddRange(entities);
             }
+
+            entityTypes = entityTypes.Distinct().ToList();
 
             var removeList = new List<Type>();
             for (var i = 0; i < entityTypes.Count; i++)
@@ -144,8 +156,13 @@ namespace StandardRepository.Helpers
         {
             for (var i = 0; i < reader.FieldCount; i++)
             {
-                var fieldName = reader.GetName(i);
+                var value = reader[i];
+                if (value == DBNull.Value)
+                {
+                    continue;
+                }
 
+                var fieldName = reader.GetName(i);
                 var fieldNameCacheKey = entityTypeName + fieldName;
 
                 string propName;
@@ -159,19 +176,17 @@ namespace StandardRepository.Helpers
                     FieldNameCache.Add(fieldNameCacheKey, propName);
                 }
 
-                var prop = properties.FirstOrDefault(x => x.Name == propName);
-                if (prop == null)
+                for (var j = 0; j < properties.Length; j++)
                 {
-                    continue;
-                }
+                    var property = properties[j];
+                    if (property.Name != propName)
+                    {
+                        continue;
+                    }
 
-                var value = reader[i];
-                if (value == DBNull.Value)
-                {
-                    continue;
+                    property.SetValue(entity, value, null);
+                    break;
                 }
-
-                prop.SetValue(entity, value, null);
             }
         }
 

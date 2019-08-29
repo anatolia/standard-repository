@@ -19,19 +19,17 @@ namespace StandardRepository.PostgreSQL.DbGenerator
     {
         private readonly TypeLookup _typeLookup;
         private new readonly PostgreSQLExecutor _sqlExecutor;
-        private readonly List<Type> _entityTypes;
 
         public PostgreSQLDbGenerator(TypeLookup typeLookup, EntityUtils entityUtils, PostgreSQLExecutor sqlExecutorMaster,
                                      PostgreSQLExecutor sqlExecutor) : base(entityUtils, sqlExecutorMaster, sqlExecutor)
         {
             _typeLookup = typeLookup;
             _sqlExecutor = sqlExecutor;
-            _entityTypes = _entityUtils.GetEntityTypes().Distinct().ToList();
         }
 
         public override List<string> GenerateSchemas()
         {
-            var schemas = _entityTypes.Select(x => _entityUtils.GetSchemaName(x)).Distinct().ToList();
+            var schemas = _entityUtils.EntityTypes.Select(x => _entityUtils.GetSchemaName(x)).Distinct().ToList();
             for (var i = 0; i < schemas.Count; i++)
             {
                 var schema = schemas[i];
@@ -45,9 +43,9 @@ namespace StandardRepository.PostgreSQL.DbGenerator
         {
             var result = new List<string>();
 
-            for (var i = 0; i < _entityTypes.Count; i++)
+            for (var i = 0; i < _entityUtils.EntityTypes.Count; i++)
             {
-                var entityType = _entityTypes[i];
+                var entityType = _entityUtils.EntityTypes[i];
                 var tableFullName = _entityUtils.GetTableFullName(entityType);
                 result.Add(tableFullName);
 
@@ -86,81 +84,81 @@ namespace StandardRepository.PostgreSQL.DbGenerator
         #region Stored Procedure and Function Generators
         protected override void PrepareInsertProcedures()
         {
-            for (var i = 0; i < _entityTypes.Count; i++)
+            for (var i = 0; i < _entityUtils.EntityTypes.Count; i++)
             {
-                var entityType = _entityTypes[i];
+                var entityType = _entityUtils.EntityTypes[i];
                 PrepareStoredProcedure(entityType, SQLConstants.PROCEDURE_INSERT_POSTFIX, GetInsertStoredProcedureSql);
             }
         }
 
         protected override void PrepareUpdateProcedures()
         {
-            for (var i = 0; i < _entityTypes.Count; i++)
+            for (var i = 0; i < _entityUtils.EntityTypes.Count; i++)
             {
-                var entityType = _entityTypes[i];
+                var entityType = _entityUtils.EntityTypes[i];
                 PrepareStoredProcedure(entityType, SQLConstants.PROCEDURE_UPDATE_POSTFIX, GetUpdateStoredProcedureSql);
             }
         }
 
         protected override void PrepareDeleteProcedures()
         {
-            for (var i = 0; i < _entityTypes.Count; i++)
+            for (var i = 0; i < _entityUtils.EntityTypes.Count; i++)
             {
-                var entityType = _entityTypes[i];
+                var entityType = _entityUtils.EntityTypes[i];
                 PrepareStoredProcedure(entityType, SQLConstants.PROCEDURE_DELETE_POSTFIX, GetDeleteStoredProcedureSql);
             }
         }
 
         protected override void PrepareUndoDeleteProcedures()
         {
-            for (var i = 0; i < _entityTypes.Count; i++)
+            for (var i = 0; i < _entityUtils.EntityTypes.Count; i++)
             {
-                var entityType = _entityTypes[i];
+                var entityType = _entityUtils.EntityTypes[i];
                 PrepareStoredProcedure(entityType, SQLConstants.PROCEDURE_UNDO_DELETE_POSTFIX, GetUndoDeleteStoredProcedureSql);
             }
         }
 
         protected override void PrepareHardDeleteProcedures()
         {
-            for (var i = 0; i < _entityTypes.Count; i++)
+            for (var i = 0; i < _entityUtils.EntityTypes.Count; i++)
             {
-                var entityType = _entityTypes[i];
+                var entityType = _entityUtils.EntityTypes[i];
                 PrepareStoredProcedure(entityType, SQLConstants.PROCEDURE_HARD_DELETE_POSTFIX, GetHardDeleteStoredProcedureSql);
             }
         }
 
         protected override void PrepareSelectByIdProcedures()
         {
-            for (var i = 0; i < _entityTypes.Count; i++)
+            for (var i = 0; i < _entityUtils.EntityTypes.Count; i++)
             {
-                var entityType = _entityTypes[i];
+                var entityType = _entityUtils.EntityTypes[i];
                 PrepareStoredProcedure(entityType, SQLConstants.PROCEDURE_SELECT_BY_ID_POSTFIX, GetSelectByIdStoredProcedureSql);
             }
         }
 
         protected override void PrepareRevisionsProcedures()
         {
-            for (var i = 0; i < _entityTypes.Count; i++)
+            for (var i = 0; i < _entityUtils.EntityTypes.Count; i++)
             {
-                var entityType = _entityTypes[i];
+                var entityType = _entityUtils.EntityTypes[i];
                 PrepareStoredProcedure(entityType, SQLConstants.PROCEDURE_SELECT_REVISIONS_POSTFIX, GetSelectRevisionsStoredProcedureSql);
             }
         }
 
         protected override void PrepareSaveRevisionProcedures()
         {
-            for (var i = 0; i < _entityTypes.Count; i++)
+            for (var i = 0; i < _entityUtils.EntityTypes.Count; i++)
             {
-                var entityType = _entityTypes[i];
+                var entityType = _entityUtils.EntityTypes[i];
                 PrepareStoredProcedure(entityType, SQLConstants.PROCEDURE_SAVE_REVISION_POSTFIX, GetSaveRevisionStoredProcedureSql);
             }
         }
 
         protected override void PrepareRestoreRevisionProcedures()
         {
-            for (var i = 0; i < _entityTypes.Count; i++)
+            for (var i = 0; i < _entityUtils.EntityTypes.Count; i++)
             {
-                var entityType = _entityTypes[i];
+                var entityType = _entityUtils.EntityTypes[i];
                 PrepareStoredProcedure(entityType, SQLConstants.PROCEDURE_RESTORE_REVISION_POSTFIX, GetRestoreRevisionStoredProcedureSql);
             }
         }
@@ -207,6 +205,10 @@ namespace StandardRepository.PostgreSQL.DbGenerator
             var sb = new StringBuilder();
             var relatedTypes = _entityUtils.GetRelatedEntityTypes(entityType);
             var tableName = _entityUtils.GetTableName(entityType);
+
+            var setPart = $"    {SQLConstants.SET} {tableName}_name = {SQLConstants.NAME_PARAMETER_NAME}{Environment.NewLine}" +
+                          $"    {SQLConstants.WHERE} {model.IdFieldName} = {model.IdParameterName};{Environment.NewLine}{Environment.NewLine}";
+
             for (var i = 0; i < relatedTypes.Count; i++)
             {
                 var relatedType = relatedTypes[i];
@@ -214,8 +216,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
                 var delimitedName = relatedType.Name.GetDelimitedName();
 
                 sb.Append($"    {SQLConstants.UPDATE} {schemaName}.{delimitedName}{Environment.NewLine}");
-                sb.Append($"    {SQLConstants.SET} {tableName}_name = {SQLConstants.NAME_PARAMETER_NAME}{Environment.NewLine}");
-                sb.Append($"    {SQLConstants.WHERE} {model.IdFieldName} = {model.IdParameterName};{Environment.NewLine}{Environment.NewLine}");
+                sb.Append(setPart);
             }
 
             return sb.ToString();
@@ -227,6 +228,9 @@ namespace StandardRepository.PostgreSQL.DbGenerator
             var baseTableSchema = _entityUtils.GetSchemaName(entityType);
             var baseTableName = _entityUtils.GetTableName(entityType);
 
+            var setPart = $"    {SQLConstants.SET} {baseTableName}_name = (SELECT bt.{baseTableName}_name FROM {baseTableSchema}.{baseTableName} bt WHERE bt.{baseTableName}_id = {SQLConstants.PARAMETER_PREFIX}{baseTableName}_id){Environment.NewLine}" +
+                          $"    {SQLConstants.WHERE} {model.IdFieldName} = {model.IdParameterName};{Environment.NewLine}{Environment.NewLine}";
+
             var relatedTypes = _entityUtils.GetRelatedEntityTypes(entityType);
             for (var i = 0; i < relatedTypes.Count; i++)
             {
@@ -235,8 +239,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
                 var delimitedName = relatedType.Name.GetDelimitedName();
 
                 sb.Append($"    {SQLConstants.UPDATE} {schemaName}.{delimitedName}{Environment.NewLine}");
-                sb.Append($"    {SQLConstants.SET} {baseTableName}_name = (SELECT bt.{baseTableName}_name FROM {baseTableSchema}.{baseTableName} bt WHERE bt.{baseTableName}_id = {SQLConstants.PARAMETER_PREFIX}{baseTableName}_id){Environment.NewLine}");
-                sb.Append($"    {SQLConstants.WHERE} {model.IdFieldName} = {model.IdParameterName};{Environment.NewLine}{Environment.NewLine}");
+                sb.Append(setPart);
             }
 
             return sb.ToString();
@@ -364,12 +367,13 @@ namespace StandardRepository.PostgreSQL.DbGenerator
 
         private static string GetNotNullStringIfFieldNullable(PropertyInfo field)
         {
-            return IsNullableField(field) ? string.Empty : " not null";
-        }
+            if (field.PropertyType.IsGenericType
+                && field.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                return string.Empty;
+            }
 
-        private static bool IsNullableField(PropertyInfo field)
-        {
-            return field.PropertyType.IsGenericType && field.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>);
+            return " not null";
         }
 
         public string GetFieldPartOfQuery(Type entityType, bool isSelfFieldsOnly = false, bool isWithRevisionFields = true,
@@ -417,8 +421,6 @@ namespace StandardRepository.PostgreSQL.DbGenerator
                 }
             }
 
-            var baseProperties = _entityUtils.GetBaseProperties();
-
             var fields = _entityUtils.GetAllProperties(entityType);
             for (var i = 0; i < fields.Length; i++)
             {
@@ -433,7 +435,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
                 }
 
                 if (isSelfFieldsOnly
-                    && baseProperties.ToList().Any(x => x.Name == field.Name))
+                    && _entityUtils.BaseProperties.Any(x => x.Name == field.Name))
                 {
                     continue;
                 }
@@ -504,8 +506,6 @@ namespace StandardRepository.PostgreSQL.DbGenerator
         {
             var sb = new StringBuilder();
 
-            var baseProperties = _entityUtils.GetBaseProperties();
-
             var fields = _entityUtils.GetAllProperties(entityType);
             for (var i = 0; i < fields.Length; i++)
             {
@@ -515,7 +515,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
                 if (field.Name == "Id"
                     || field.Name == "Uid"
                     || field.Name == "Name"
-                    || baseProperties.ToList().Any(x => x.Name == field.Name))
+                    || _entityUtils.BaseProperties.Any(x => x.Name == field.Name))
                 {
                     continue;
                 }
