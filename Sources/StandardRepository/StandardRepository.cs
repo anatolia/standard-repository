@@ -34,8 +34,8 @@ namespace StandardRepository
         public List<string> UpdateableFields { get; protected set; }
 
         protected Dictionary<Expression, string> FieldNameCache { get; set; }
+        protected Dictionary<string, ParameterNameCacheInfo> ParameterNameCache { get; set; }
         protected PropertyInfo[] Fields { get; }
-        protected PropertyInfo[] BaseFields { get; }
 
         protected readonly TypeLookup _typeLookup;
         protected readonly EntityUtils _entityUtils;
@@ -54,9 +54,9 @@ namespace StandardRepository
 
             var entityType = typeof(T);
             Fields = _entityUtils.GetProperties(entityType);
-            BaseFields = _entityUtils.GetBaseProperties();
 
             FieldNameCache = new Dictionary<Expression, string>();
+            ParameterNameCache = new Dictionary<string, ParameterNameCacheInfo>();
         }
 
         public ISQLExecutor<TCommand, TConnection, TParameter> SQLExecutor { get; set; }
@@ -72,7 +72,7 @@ namespace StandardRepository
             for (var i = 0; i < Fields.Length; i++)
             {
                 var field = Fields[i];
-                if (BaseFields.Any(x => x.Name == field.Name))
+                if (_entityUtils.BaseProperties.Any(x => x.Name == field.Name))
                 {
                     continue;
                 }
@@ -489,18 +489,32 @@ namespace StandardRepository
         {
             var prms = new List<TParameter>();
 
-            var parameterName = _entityUtils.GetParameterNameFromPropertyName(field.Name);
-            var dbType = _typeLookup.GetDbType(field.PropertyType);
+            var cacheKey = field.Name + field.PropertyType.Name;
+
+            ParameterNameCacheInfo info;
+            if (ParameterNameCache.ContainsKey(cacheKey))
+            {
+                info = ParameterNameCache[cacheKey];
+            }
+            else
+            {
+                info = new ParameterNameCacheInfo
+                {
+                    ParameterName = $"prm_{field.Name.GetDelimitedName()}",
+                    DbType = _typeLookup.GetDbType(field.PropertyType)
+                };
+                ParameterNameCache.Add(cacheKey, info);
+            }
+
             var valueFromProperty = GetValueFromProperty(entity, field);
 
-            SQLExecutor.AddParameter(prms, parameterName, valueFromProperty, dbType);
+            SQLExecutor.AddParameter(prms, info.ParameterName, valueFromProperty, info.DbType);
 
             return prms.ToArray();
         }
 
-        private static object GetValueFromProperty(T entity, PropertyInfo field)
+        private static object GetValueFromProperty(T entity, PropertyInfo property)
         {
-            var property = entity.GetType().GetProperty(field.Name);
             var value = property.GetValue(entity, null);
 
             if (property.PropertyType == typeof(string)
