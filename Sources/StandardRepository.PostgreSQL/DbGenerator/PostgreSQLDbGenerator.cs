@@ -26,7 +26,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
         {
             _typeLookup = typeLookup;
             _sqlExecutor = sqlExecutor;
-            _entityTypes = _entityUtils.GetEntityTypes();
+            _entityTypes = _entityUtils.GetEntityTypes().Distinct().ToList();
         }
 
         public override List<string> GenerateSchemas()
