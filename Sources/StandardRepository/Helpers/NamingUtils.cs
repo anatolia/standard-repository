@@ -59,5 +59,44 @@ namespace StandardRepository.Helpers
             builder.Remove(builder.Length - 1, 1);
             return builder.ToString().ToLowerInvariant();
         }
+
+        public static string GetPropNameFromFieldName(this string fieldName, string entityTypeName)
+        {
+            var delimitedTypeName = GetDelimitedName(entityTypeName);
+            if (fieldName == delimitedTypeName + "_id")
+            {
+                return "Id";
+            }
+
+            if (fieldName == delimitedTypeName + "_uid")
+            {
+                return "Uid";
+            }
+
+            if (fieldName == delimitedTypeName + "_name")
+            {
+                return "Name";
+            }
+
+            var propName = fieldName[0].ToString().ToUpperInvariant();
+            for (var i = 1; i < fieldName.Length; i++)
+            {
+                if (fieldName[i] == '_')
+                {
+                    continue;
+                }
+
+                if (fieldName[i - 1] == '_')
+                {
+                    propName += fieldName[i].ToString().ToUpperInvariant();
+                }
+                else
+                {
+                    propName += fieldName[i];
+                }
+            }
+
+            return propName;
+        }
     }
 }
