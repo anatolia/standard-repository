@@ -1,19 +1,13 @@
 ﻿using NUnit.Framework;
 using StandardRepository.Helpers;
-using StandardRepository.Models.Entities;
-using StandardRepository.Models.Entities.Schemas;
 using StandardRepository.PostgreSQL.Helpers;
 using StandardRepository.Tests.Base.Entities;
 using StandardRepository.Tests.IntegrationTests.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Data;
 using System.Reflection;
-using System.Text;
 
 namespace StandardRepository.Tests.UnitTests.Helpers
 {
-  
+
     [TestFixture]
     public class EntityUtilsTests: BaseRepositoryIntegrationTests
     {
