@@ -7,8 +7,8 @@ using NUnit.Framework;
 using Shouldly;
 using StandardRepository.Models;
 using StandardRepository.PostgreSQL.Helpers;
-using StandardRepository.PostgreSQL.Tests.Base.Entities;
 using StandardRepository.PostgreSQL.Tests.Base.Requests;
+using StandardRepository.Tests.Base.Entities;
 
 namespace StandardRepository.PostgreSQL.Tests.UnitTests
 {

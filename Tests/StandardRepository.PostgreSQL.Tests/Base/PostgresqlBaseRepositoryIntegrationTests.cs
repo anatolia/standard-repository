@@ -9,8 +9,8 @@ using StandardRepository.PostgreSQL.DbGenerator;
 using StandardRepository.PostgreSQL.Factories;
 using StandardRepository.PostgreSQL.Helpers;
 using StandardRepository.PostgreSQL.Helpers.SqlExecutor;
-using StandardRepository.PostgreSQL.Tests.Base.Entities;
 using StandardRepository.PostgreSQL.Tests.Base.Repositories;
+using StandardRepository.Tests.Base.Entities;
 using StandardRepository.Tests.IntegrationTests.Helpers;
 
 namespace StandardRepository.PostgreSQL.Tests.Base

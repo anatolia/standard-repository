@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 using NUnit.Framework;
@@ -11,7 +10,7 @@ using StandardRepository.Helpers;
 using StandardRepository.Models;
 using StandardRepository.Models.Entities;
 using StandardRepository.PostgreSQL.Tests.Base;
-using StandardRepository.PostgreSQL.Tests.Base.Entities;
+using StandardRepository.Tests.Base.Entities;
 
 namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
 {
