@@ -3,7 +3,7 @@
 using StandardRepository.Helpers;
 using StandardRepository.PostgreSQL.Helpers;
 using StandardRepository.PostgreSQL.Helpers.SqlExecutor;
-using StandardRepository.PostgreSQL.Tests.Base.Entities;
+using StandardRepository.Tests.Base.Entities;
 
 namespace StandardRepository.PostgreSQL.Tests.Base.Repositories
 {

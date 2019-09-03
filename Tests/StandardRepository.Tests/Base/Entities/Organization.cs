@@ -3,7 +3,7 @@
 using StandardRepository.Models.Entities;
 using StandardRepository.Models.Entities.Schemas;
 
-namespace StandardRepository.PostgreSQL.Tests.Base.Entities
+namespace StandardRepository.Tests.Base.Entities
 {
     public class Organization : BaseEntity, ISchemaMain
     {
@@ -11,10 +11,8 @@ namespace StandardRepository.PostgreSQL.Tests.Base.Entities
         public string Description { get; set; }
         public bool IsActive { get; set; }
         public bool IsSuperOrganization { get; set; }
-
         public int ProjectCount { get; set; }
         public DateTime StartDate { get; set; }
-
         public long LongField { get; set; }
     }
 }

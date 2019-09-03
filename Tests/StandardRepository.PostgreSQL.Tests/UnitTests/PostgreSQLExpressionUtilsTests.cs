@@ -1,14 +1,16 @@
 ﻿using System;
+using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Threading;
-using NUnit.Framework;
+
 using Shouldly;
+using NUnit.Framework;
+
 using StandardRepository.Models;
 using StandardRepository.PostgreSQL.Helpers;
-using StandardRepository.PostgreSQL.Tests.Base.Entities;
 using StandardRepository.PostgreSQL.Tests.Base.Requests;
+using StandardRepository.Tests.Base.Entities;
 
 namespace StandardRepository.PostgreSQL.Tests.UnitTests
 {
