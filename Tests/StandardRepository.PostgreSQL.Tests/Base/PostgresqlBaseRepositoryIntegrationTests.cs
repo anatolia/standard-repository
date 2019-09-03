@@ -74,7 +74,7 @@ namespace StandardRepository.PostgreSQL.Tests.Base
         public OrganizationRepository GetOrganizationRepository()
         {
             var postgreSQLTypeLookup = GetTypeLookup();
-            var entityUtils = GetEntityUtils(postgreSQLTypeLookup, Assembly.GetExecutingAssembly());
+            var entityUtils = GetEntityUtils(postgreSQLTypeLookup, GetAssemblyOfEntities());
             var sqlExecutor = GetSQLExecutor(GetTestDBName());
             var repository = new OrganizationRepository(postgreSQLTypeLookup, new PostgreSQLConstants<Organization>(entityUtils), entityUtils,
                                                         new PostgreSQLExpressionUtils(), sqlExecutor, new List<string>());
@@ -82,10 +82,15 @@ namespace StandardRepository.PostgreSQL.Tests.Base
             return repository;
         }
 
+        private static Assembly GetAssemblyOfEntities()
+        {
+            return typeof(Organization).Assembly;
+        }
+
         public ProjectRepository GetProjectRepository()
         {
             var postgreSQLTypeLookup = GetTypeLookup();
-            var entityUtils = GetEntityUtils(postgreSQLTypeLookup, Assembly.GetExecutingAssembly());
+            var entityUtils = GetEntityUtils(postgreSQLTypeLookup, GetAssemblyOfEntities());
             var sqlExecutor = GetSQLExecutor(GetTestDBName());
             var repository = new ProjectRepository(postgreSQLTypeLookup, new PostgreSQLConstants<Project>(entityUtils), entityUtils,
                                                    new PostgreSQLExpressionUtils(), sqlExecutor, new List<string>());
@@ -112,7 +117,7 @@ namespace StandardRepository.PostgreSQL.Tests.Base
             if (!isDbExist)
             {
                 var typeLookup = new PostgreSQLTypeLookup();
-                var entityUtils = new EntityUtils(typeLookup, Assembly.GetExecutingAssembly());
+                var entityUtils = new EntityUtils(typeLookup, GetAssemblyOfEntities());
                 var executor = GetSQLExecutor(dbName);
                 var dbGenerator = new PostgreSQLDbGenerator(typeLookup, entityUtils, (PostgreSQLExecutor)masterExecutor, (PostgreSQLExecutor)executor);
                 dbGenerator.Generate().Wait();
@@ -136,7 +141,7 @@ namespace StandardRepository.PostgreSQL.Tests.Base
         public PostgreSQLExecutor GetSQLExecutor(string dbName)
         {
             var typeLookup = new PostgreSQLTypeLookup();
-            var entityUtils = new EntityUtils(typeLookup, Assembly.GetExecutingAssembly());
+            var entityUtils = new EntityUtils(typeLookup, GetAssemblyOfEntities());
             var sqlExecutor = new PostgreSQLExecutor(new PostgreSQLConnectionFactory(GetConnectionSettings(dbName)), entityUtils);
             return sqlExecutor;
         }
