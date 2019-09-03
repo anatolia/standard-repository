@@ -74,17 +74,8 @@ namespace StandardRepository.Tests.UnitTests.Helpers
         public void Verify_MapFields()
         {
             var organization = new Organization();
-            Mock<IDataReader> dataRecord = new Mock<IDataReader>();
-
-            dataRecord.Setup(reader => reader.FieldCount).Returns(3);
-            dataRecord.Setup(reader => reader[0]).Returns("test@gmail.com");
-            dataRecord.Setup(reader => reader.GetName(0)).Returns("Email");
-            dataRecord.Setup(reader => reader[1]).Returns("this is test case");
-            dataRecord.Setup(reader => reader.GetName(1)).Returns("Description");
-            dataRecord.Setup(reader => reader[2]).Returns(true);
-            dataRecord.Setup(reader => reader.GetName(2)).Returns("IsActive");
-
-            SystemUnderTest.MapFields<Organization>(dataRecord.Object, SystemUnderTest.GetAllProperties(organization.GetType()),SystemUnderTest.GetTableName(organization.GetType()),organization);
+          
+            SystemUnderTest.MapFields<Organization>(GetMockDataReaderForMapFieldsRevisions().Object, SystemUnderTest.GetAllProperties(organization.GetType()),SystemUnderTest.GetTableName(organization.GetType()),organization);
 
             Assert.AreEqual(organization.Email,"test@gmail.com");
             Assert.AreEqual(organization.Description, "this is test case");
@@ -94,10 +85,24 @@ namespace StandardRepository.Tests.UnitTests.Helpers
         [Test]
         public void Verify_MapFields_Revision()
         {
-            var organization = new Organization();
-            
+            var organization = new Organization();            
+            var revisionAt = DateTime.UtcNow;          
+            var revision = new EntityRevision<Organization>();            
+
+            SystemUnderTest.MapFieldsRevision<Organization>(GetMockDataReaderForMapFieldsRevisions(true,revisionAt).Object, SystemUnderTest.GetAllProperties(organization.GetType()), SystemUnderTest.GetTableName(organization.GetType()), revision);
+
+            Assert.AreEqual(revision.Entity.Email, "test@gmail.com");
+            Assert.AreEqual(revision.Entity.Description, "this is test case");
+            Assert.IsTrue(revision.Entity.IsActive);
+            Assert.AreEqual(revision.Id,1);
+            Assert.AreEqual(revision.Revision, 2);
+            Assert.AreEqual(revision.RevisionedAt, revisionAt);
+        }
+
+        private Mock<IDataReader> GetMockDataReaderForMapFieldsRevisions(bool isRevisionTest=false,DateTime? revisionAt=null)
+        {
             Mock<IDataReader> dataRecord = new Mock<IDataReader>();
-            
+
             dataRecord.Setup(reader => reader.FieldCount).Returns(3);
             dataRecord.Setup(reader => reader[0]).Returns("test@gmail.com");
             dataRecord.Setup(reader => reader.GetName(0)).Returns("Email");
@@ -106,22 +111,14 @@ namespace StandardRepository.Tests.UnitTests.Helpers
             dataRecord.Setup(reader => reader[2]).Returns(true);
             dataRecord.Setup(reader => reader.GetName(2)).Returns("IsActive");
 
-            dataRecord.Setup(reader => reader["organization_id"]).Returns(1);
-            dataRecord.Setup(reader => reader["revision"]).Returns(2);
-            dataRecord.Setup(reader => reader["revisioned_by"]).Returns(10000);
-            var revisionAt = DateTime.UtcNow;
-
-            dataRecord.Setup(reader => reader["revisioned_at"]).Returns(revisionAt);
-
-            var revision = new EntityRevision<Organization>();            
-            SystemUnderTest.MapFieldsRevision<Organization>(dataRecord.Object, SystemUnderTest.GetAllProperties(organization.GetType()), SystemUnderTest.GetTableName(organization.GetType()), revision);
-
-            Assert.AreEqual(revision.Entity.Email, "test@gmail.com");
-            Assert.AreEqual(revision.Entity.Description, "this is test case");
-            Assert.IsTrue(revision.Entity.IsActive);
-            Assert.AreEqual(revision.Id,1);
-            Assert.AreEqual(revision.Revision, 2);
-            Assert.AreEqual(revision.RevisionedAt, revisionAt);
+            if (isRevisionTest)
+            {
+                dataRecord.Setup(reader => reader["organization_id"]).Returns(1);
+                dataRecord.Setup(reader => reader["revision"]).Returns(2);
+                dataRecord.Setup(reader => reader["revisioned_by"]).Returns(10000);
+                dataRecord.Setup(reader => reader["revisioned_at"]).Returns(revisionAt.Value);
+            }
+            return dataRecord;
         }
     }
 }
