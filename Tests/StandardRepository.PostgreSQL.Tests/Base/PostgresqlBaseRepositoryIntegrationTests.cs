@@ -83,6 +83,11 @@ namespace StandardRepository.PostgreSQL.Tests.Base
             return repository;
         }
 
+        private static Assembly GetAssemblyOfEntities()
+        {
+            return typeof(Organization).Assembly;
+        }
+
         public ProjectRepository GetProjectRepository()
         {
             var postgreSQLTypeLookup = GetTypeLookup();
