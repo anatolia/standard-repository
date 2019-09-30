@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <Company>anatolia.solutions</Company>
     <Authors />
     <PackageProjectUrl>https://github.com/anatolia/standard-repository</PackageProjectUrl>
