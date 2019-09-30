@@ -10,6 +10,7 @@ namespace StandardRepository.Tests.UnitTests.Helpers
     {
         [TestCase("OrganizationId", "organization_id"),
          TestCase("Ip", "ip"),
+         TestCase("XAxisTitle", "x_axis_title"),
          TestCase("IP", "ip"),
          TestCase("Name", "name")]
         public void GetDelimitedName_Length2_Delimited(string name, string expected)
