@@ -58,10 +58,8 @@ namespace StandardRepository.Tests.UnitTests.Helpers
         public void Verify_Get_All_Properties()
         {
             var organization = new Organization();
-
-            var result = SystemUnderTest.GetAllProperties(organization.GetType());
-
-            Assert.AreEqual(result.Length, 17);
+            var result = SystemUnderTest.GetAllProperties(organization.GetType());           
+            Assert.AreEqual(result.Length, 18);
             Assert.AreEqual(result[0].Name, "Email");
             Assert.AreEqual(result[1].Name, "Description");
         }

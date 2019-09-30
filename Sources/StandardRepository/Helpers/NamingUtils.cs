@@ -8,8 +8,8 @@ using StandardRepository.Models.Entities;
 namespace StandardRepository.Helpers
 {
     public static class NamingUtils
-    {
-        private static readonly Regex DelimitedNameRegex = new Regex(@"([A-Z]+[a-z]*)|(\d+)", RegexOptions.Compiled);
+    {        
+        private static readonly Regex DelimitedNameRegex = new Regex(@"[A-Z][^A-Z]*", RegexOptions.Compiled);
 
         public static string GetFieldNameFromPropertyName(this string propertyName, string entityTypeName = null)
         {
@@ -38,7 +38,7 @@ namespace StandardRepository.Helpers
 
         public static string GetDelimitedName(this string name)
         {
-            if (name.Length < 2
+            if (name.Length <= 2
                 || name.ToCharArray().Count(char.IsUpper) < 2)
             {
                 return name.ToLowerInvariant();
