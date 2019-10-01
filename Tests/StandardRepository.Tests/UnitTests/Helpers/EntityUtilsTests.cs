@@ -59,9 +59,27 @@ namespace StandardRepository.Tests.UnitTests.Helpers
         {
             var organization = new Organization();
             var result = SystemUnderTest.GetAllProperties(organization.GetType());           
+            
             Assert.AreEqual(result.Length, 18);
-            Assert.AreEqual(result[0].Name, "Email");
-            Assert.AreEqual(result[1].Name, "Description");
+            
+            Assert.AreEqual(result[0].Name, nameof(Organization.Email));
+            Assert.AreEqual(result[1].Name, nameof(Organization.Description));
+            Assert.AreEqual(result[2].Name, nameof(Organization.IsActive));
+            Assert.AreEqual(result[3].Name, nameof(Organization.IsSuperOrganization));
+            Assert.AreEqual(result[4].Name, nameof(Organization.ProjectCount));
+            Assert.AreEqual(result[5].Name, nameof(Organization.StartDate));
+            Assert.AreEqual(result[6].Name, nameof(Organization.LongField));
+            Assert.AreEqual(result[7].Name, nameof(Organization.XAxisTitle));
+            Assert.AreEqual(result[8].Name, nameof(Organization.Id));
+            Assert.AreEqual(result[9].Name, nameof(Organization.Uid));
+            Assert.AreEqual(result[10].Name, nameof(Organization.Name));
+            Assert.AreEqual(result[11].Name, nameof(Organization.CreatedBy));
+            Assert.AreEqual(result[12].Name, nameof(Organization.CreatedAt));
+            Assert.AreEqual(result[13].Name, nameof(Organization.UpdatedBy));
+            Assert.AreEqual(result[14].Name, nameof(Organization.UpdatedAt));
+            Assert.AreEqual(result[15].Name, nameof(Organization.DeletedBy));
+            Assert.AreEqual(result[16].Name, nameof(Organization.DeletedAt));
+            Assert.AreEqual(result[17].Name, nameof(Organization.IsDeleted));
         }
 
         [Test]

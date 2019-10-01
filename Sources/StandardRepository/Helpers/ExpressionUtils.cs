@@ -121,6 +121,7 @@ namespace StandardRepository.Helpers
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine(ex.Message);
                     rightPart = GetConditions(body.Right, parameters);
                 }
 
@@ -135,6 +136,7 @@ namespace StandardRepository.Helpers
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine(ex.Message);
                     leftPart = GetConditions(body.Left, parameters);
                 }
 

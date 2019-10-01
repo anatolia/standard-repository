@@ -8,7 +8,7 @@ using StandardRepository.Models.Entities;
 namespace StandardRepository.Helpers
 {
     public static class NamingUtils
-    {        
+    {
         private static readonly Regex DelimitedNameRegex = new Regex(@"[A-Z][^A-Z]*", RegexOptions.Compiled);
 
         public static string GetFieldNameFromPropertyName(this string propertyName, string entityTypeName = null)
@@ -43,7 +43,7 @@ namespace StandardRepository.Helpers
             {
                 return name.ToLowerInvariant();
             }
-            
+
             var matches = DelimitedNameRegex.Matches(name);
             var builder = new StringBuilder();
             foreach (var item in matches)
