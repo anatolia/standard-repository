@@ -34,6 +34,7 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
             result.Email.ShouldBe(entity.Email);
             result.IsActive.ShouldBe(entity.IsActive);
             result.ProjectCount.ShouldBe(entity.ProjectCount);
+            result.XAxisTitle.ShouldBe(entity.XAxisTitle);
 
             AssertCreated(result);
             AssertUpdateFieldsNull(result);

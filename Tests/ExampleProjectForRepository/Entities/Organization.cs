@@ -1,8 +1,9 @@
 ﻿using System;
+
 using StandardRepository.Models.Entities;
 using StandardRepository.Models.Entities.Schemas;
 
-namespace ExampleProject.Entities
+namespace ExampleProjectForRepository.Entities
 {
     public class Organization : BaseEntity, ISchemaMain
     {

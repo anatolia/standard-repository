@@ -8,10 +8,10 @@ using StandardRepository.PostgreSQL;
 using StandardRepository.PostgreSQL.Factories;
 using StandardRepository.PostgreSQL.Helpers;
 
-using ExampleProject.Entities;
-using ExampleProject.Repositories;
+using ExampleProjectForRepository.Entities;
+using ExampleProjectForRepository.Repositories;
 
-namespace ExampleProject
+namespace ExampleProjectForRepository
 {
     class Program
     {

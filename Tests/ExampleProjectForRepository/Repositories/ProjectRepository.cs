@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
-using ExampleProject.Entities;
+
 using StandardRepository.Helpers;
 using StandardRepository.PostgreSQL;
 using StandardRepository.PostgreSQL.Helpers;
 using StandardRepository.PostgreSQL.Helpers.SqlExecutor;
 
-namespace ExampleProject.Repositories
+using ExampleProjectForRepository.Entities;
+
+namespace ExampleProjectForRepository.Repositories
 {
     public class ProjectRepository : PostgreSQLRepository<Project>
     {

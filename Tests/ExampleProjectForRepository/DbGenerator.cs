@@ -8,7 +8,7 @@ using StandardRepository.PostgreSQL.Factories;
 using StandardRepository.PostgreSQL.Helpers;
 using StandardRepository.PostgreSQL.Helpers.SqlExecutor;
 
-namespace ExampleProject
+namespace ExampleProjectForRepository
 {
     public class DbGenerator
     {
