@@ -14,8 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Sources\StandardRepository.PostgreSQL\StandardRepository.PostgreSQL.csproj" />
-    <ProjectReference Include="..\..\Sources\StandardRepository\StandardRepository.csproj" />
+    <ProjectReference Include="..\..\Sources\StandardRepository.PostgreSQL\StandardRepository.PostgreSQL.csproj" />    
     <ProjectReference Include="..\StandardRepository.Tests\StandardRepository.Tests.csproj" />
   </ItemGroup>
 
