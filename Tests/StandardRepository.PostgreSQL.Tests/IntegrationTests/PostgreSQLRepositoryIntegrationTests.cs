@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using NUnit.Framework;
@@ -50,7 +51,7 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
             var id = await repository.Insert(CURRENT_USER_ID, entity);
             entity = await repository.SelectById(id);
             entity.IsSuperOrganization = true;
-            entity.Description = "test description " + Guid.NewGuid();
+            entity.Description = $"test description {Guid.NewGuid()}";
             entity.Name = "updated name";
 
             // act
@@ -312,17 +313,17 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
             // arrange
             var repository = GetProjectRepository();
             var entity = GetProject(GetOrganization());
-            entity.Cost = 100;
+            entity.ProjectCost = 100;
             await repository.Insert(CURRENT_USER_ID, entity);
 
-            entity.Cost = 123;
+            entity.ProjectCost = 123;
             await repository.Insert(CURRENT_USER_ID, entity);
 
-            entity.Cost = 456;
+            entity.ProjectCost = 456;
             await repository.Insert(CURRENT_USER_ID, entity);
 
             // act
-            var result = await repository.Max(x => x.Id > 0, x => x.Cost);
+            var result = await repository.Max(x => x.Id > 0, x => x.ProjectCost);
 
             // assert
             result.ShouldBe(456);
@@ -378,17 +379,17 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
             // arrange
             var repository = GetProjectRepository();
             var entity = GetProject(GetOrganization());
-            entity.Cost = 100;
+            entity.ProjectCost = 100;
             await repository.Insert(CURRENT_USER_ID, entity);
 
-            entity.Cost = 123;
+            entity.ProjectCost = 123;
             await repository.Insert(CURRENT_USER_ID, entity);
 
-            entity.Cost = 456;
+            entity.ProjectCost = 456;
             await repository.Insert(CURRENT_USER_ID, entity);
 
             // act
-            var result = await repository.Min(x => x.Id > 0, x => x.Cost);
+            var result = await repository.Min(x => x.Id > 0, x => x.ProjectCost);
 
             // assert
             result.ShouldBe(100);
@@ -444,17 +445,17 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
             // arrange
             var repository = GetProjectRepository();
             var entity = GetProject(GetOrganization());
-            entity.Cost = 100;
+            entity.ProjectCost = 100;
             await repository.Insert(CURRENT_USER_ID, entity);
 
-            entity.Cost = 123;
+            entity.ProjectCost = 123;
             await repository.Insert(CURRENT_USER_ID, entity);
 
-            entity.Cost = 456;
+            entity.ProjectCost = 456;
             await repository.Insert(CURRENT_USER_ID, entity);
 
             // act
-            var result = await repository.Sum(x => x.Cost > 105, x => x.Cost);
+            var result = await repository.Sum(x => x.ProjectCost > 105, x => x.ProjectCost);
 
             // assert
             result.ShouldBe(123 + 456);
@@ -817,18 +818,22 @@ namespace StandardRepository.PostgreSQL.Tests.IntegrationTests
         [Test]
         public async Task Repository_Parallel_For()
         {
-            // arrange
-            var theCount = 100;
-            var entity = GetOrganization();
-
-            // act
-            Parallel.For(0, theCount, async x =>
+            // arrange / act
+            var theCount = 20;
+            for (var i = 0; i < theCount; i++)
             {
-                entity.ProjectCount += 5;
+                var thread = new Thread(() =>
+                {
+                    var entity = GetOrganization();
+                    entity.ProjectCount += new Random().Next(1,100);
 
-                var repository = GetOrganizationRepository();
-                await repository.Insert(CURRENT_USER_ID, entity);
-            });
+                    var repository = GetOrganizationRepository();
+                    repository.Insert(CURRENT_USER_ID, entity).Wait();
+                });
+                thread.Start();
+            }
+            
+            Thread.Sleep(2000);
 
             // assert
             var organizationRepository = GetOrganizationRepository();

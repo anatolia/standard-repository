@@ -42,8 +42,9 @@ namespace ExampleProjectForRepository
             {
                 Name = "test",
                 Description = "test description",
-                Cost = 1,
-                IsActive = false
+                ProjectCost = 1,
+                IsActive = false,
+                ProjectValue = "test"
             };
             var projectId = projectRepository.Insert(1, project).Result;
 
@@ -58,6 +59,13 @@ namespace ExampleProjectForRepository
             var updatedProject = projectRepository.Select(x => x.Id == projectId).Result;
 
             Console.WriteLine("Project name updated to " + updatedProject.Name);
+            
+            updatedProject.ProjectValue = "other test for object field";
+            projectRepository.Update(1, updatedProject).Wait();
+            
+            var againUpdatedProject = projectRepository.Select(x => x.Id == projectId).Result;
+
+            Console.WriteLine("Project value updated to " + againUpdatedProject.ProjectValue);
 
             Console.WriteLine("Project revisions;");
             var projectRevisions = projectRepository.SelectRevisions(projectId).Result;

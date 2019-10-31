@@ -123,12 +123,19 @@ namespace StandardRepository.PostgreSQL.Tests.UnitTests
             Expression<Func<Project, string>> expression = x => x.OrganizationName;
             Assert.AreEqual("organization_name", SystemUnderTest.GetFieldName(expression.Body));
         }
+        
+        [Test]
+        public void ExpressionUtils_GetField_object()
+        {
+            Expression<Func<Project, object>> expression = x => x.OtherValue;
+            Assert.AreEqual("other_value", SystemUnderTest.GetFieldName(expression.Body));
+        }
 
         [Test]
         public void ExpressionUtils_GetField_decimal()
         {
-            Expression<Func<Project, decimal>> expression = x => x.Cost;
-            Assert.AreEqual("cost", SystemUnderTest.GetFieldName(expression.Body));
+            Expression<Func<Project, decimal>> expression = x => x.ProjectCost;
+            Assert.AreEqual("project_cost", SystemUnderTest.GetFieldName(expression.Body));
         }
 
         [Test]
@@ -144,7 +151,23 @@ namespace StandardRepository.PostgreSQL.Tests.UnitTests
             Expression<Func<Project, DateTime?>> expression = x => x.DeletedAt;
             Assert.AreEqual("deleted_at", SystemUnderTest.GetFieldName(expression.Body));
         }
+        
+        [Test]
+        public void ExpressionUtils_GetConditions_Object()
+        {
+            Expression<Func<Project, bool>> expression = x => x.OtherValue == "test";
+            Thread.Sleep(123);
 
+            var parameters = new Dictionary<string, DbParameterInfo>();
+            var filter = SystemUnderTest.GetConditions(expression.Body, parameters);
+
+            Assert.AreEqual("other_value = :varprm_other_value", filter);
+            parameters.Count.ShouldBe(1);
+            var prmValue = parameters.Values.First();
+            prmValue.Value.ShouldBeOfType<string>();
+            prmValue.Value.ShouldBe("test");
+        }
+        
         [Test]
         public void ExpressionUtils_GetConditions_DateTime()
         {
@@ -192,12 +215,12 @@ namespace StandardRepository.PostgreSQL.Tests.UnitTests
         public void ExpressionUtils_GetConditions_decimal_variable()
         {
             var cost = new decimal(100);
-            Expression<Func<Project, bool>> expression = x => x.Cost > cost;
+            Expression<Func<Project, bool>> expression = x => x.ProjectCost > cost;
 
             var parameters = new Dictionary<string, DbParameterInfo>();
             var filter = SystemUnderTest.GetConditions(expression.Body, parameters);
 
-            Assert.AreEqual("cost > :varprm_cost", filter);
+            Assert.AreEqual("project_cost > :varprm_cost", filter);
             parameters.Count.ShouldBe(1);
             var prmValue = parameters.Values.First();
             prmValue.Value.ShouldBeOfType<decimal>();

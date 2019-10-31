@@ -119,9 +119,8 @@ namespace StandardRepository.Helpers
                     var valueRight = lambdaExpressionRight.Compile().DynamicInvoke();
                     rightPart = AddToParameters(parameters, fieldName, memberExpressionRight.Type, valueRight);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    Console.WriteLine(ex.Message);
                     rightPart = GetConditions(body.Right, parameters);
                 }
 
@@ -134,9 +133,8 @@ namespace StandardRepository.Helpers
                     var valueLeft = lambdaExpressionLeft.Compile().DynamicInvoke();
                     leftPart = AddToParameters(parameters, fieldName, memberExpressionLeft.Type, valueLeft);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    Console.WriteLine(ex.Message);
                     leftPart = GetConditions(body.Left, parameters);
                 }
 

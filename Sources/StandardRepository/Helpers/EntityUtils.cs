@@ -56,6 +56,12 @@ namespace StandardRepository.Helpers
         #endregion
 
         #region Property Helpers
+
+        /// <summary>
+        /// returns properties including coming from base.
+        /// </summary>
+        /// <param name="entityType"></param>
+        /// <returns></returns>
         public PropertyInfo[] GetAllProperties(Type entityType)
         {
             if (AllPropertiesCache.ContainsKey(entityType))
@@ -63,31 +69,73 @@ namespace StandardRepository.Helpers
                 return AllPropertiesCache[entityType];
             }
 
-            var fields = entityType.GetProperties()
-                                   .Where(x => x.PropertyType.IsPublic
-                                               && (_typeLookup.HasDbType(x.PropertyType)
-                                                   || x.PropertyType.BaseType == typeof(BaseEntity))).ToArray();
+            var fields = entityType.GetProperties();
+            
+            var properFields = new List<PropertyInfo>();
+            for (var i = 0; i < fields.Length; i++)
+            {
+                var propertyInfo = fields[i];
+                if (!propertyInfo.PropertyType.IsPublic)
+                {
+                    continue;
+                }
 
-            AllPropertiesCache.Add(entityType, fields);
-            return fields;
+                if (!_typeLookup.HasDbType(propertyInfo.PropertyType))
+                {
+                    continue;
+                }
+
+                properFields.Add(propertyInfo);
+            }
+
+            var propertyInfos = properFields.ToArray();
+            AllPropertiesCache.Add(entityType, propertyInfos);
+            return propertyInfos;
         }
-
+        
+        /// <summary>
+        /// Returns properties but excludes coming from base.
+        /// </summary>
+        /// <param name="entityType"></param>
+        /// <returns></returns>
         public PropertyInfo[] GetProperties(Type entityType)
         {
-            var fields = entityType.GetProperties()
-                                   .Where(x => x.PropertyType.IsPublic
-                                               && x.DeclaringType != typeof(BaseEntity)
-                                               && (_typeLookup.HasDbType(x.PropertyType)
-                                                   || x.PropertyType.BaseType == typeof(BaseEntity))).ToArray();
+            if (AllPropertiesCache.ContainsKey(entityType))
+            {
+                return AllPropertiesCache[entityType];
+            }
 
-            return fields;
+            var fields = entityType.GetProperties();
+            
+            var properFields = new List<PropertyInfo>();
+            for (var i = 0; i < fields.Length; i++)
+            {
+                var propertyInfo = fields[i];
+                if (!propertyInfo.PropertyType.IsPublic)
+                {
+                    continue;
+                }
+                
+                if (propertyInfo.DeclaringType == typeof(BaseEntity))
+                {
+                    continue;
+                }
+
+                if (!_typeLookup.HasDbType(propertyInfo.PropertyType))
+                {
+                    continue;
+                }
+
+                properFields.Add(propertyInfo);
+            }
+            
+            return properFields.ToArray();
         }
 
         private PropertyInfo[] GetBaseProperties()
         {
             var baseFields = typeof(BaseEntity).GetProperties()
-                                               .Where(x => _typeLookup.HasDbType(x.PropertyType)
-                                                           && x.PropertyType.IsPublic).ToArray();
+                                               .Where(x => _typeLookup.HasDbType(x.PropertyType) && x.PropertyType.IsPublic).ToArray();
             return baseFields;
         }
 

@@ -27,8 +27,15 @@ namespace StandardRepository.PostgreSQL.DbGenerator
             _sqlExecutor = sqlExecutor;
         }
 
+        /// <summary>
+        /// Generates schemas and extensions.
+        /// </summary>
+        /// <returns></returns>
         public override List<string> GenerateSchemas()
         {
+            // extension for uid generation
+            _sqlExecutor.ExecuteSql($"CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";").Wait();
+            
             var schemas = _entityUtils.EntityTypes.Select(x => _entityUtils.GetSchemaName(x)).Distinct().ToList();
             for (var i = 0; i < schemas.Count; i++)
             {
@@ -183,7 +190,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
         private const string RELATED_NAME_UPDATES = "##RELATED_NAME_UPDATES##";
         private const string RELATED_NAME_UPDATES_FOR_RESTORE = "##RELATED_NAME_UPDATES_FOR_RESTORE##";
 
-        private static string GetProcedureTemplate(string name)
+        private static string GetAssemblyResource(string name)
         {
             var assembly = Assembly.GetExecutingAssembly();
 
@@ -247,7 +254,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
 
         public string GetInsertStoredProcedureSql(Type entityType)
         {
-            var template = GetProcedureTemplate("sp_insert.txt");
+            var template = GetAssemblyResource("sp_insert.txt");
 
             var model = GetProcedureGenerationModel(entityType);
 
@@ -261,7 +268,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
 
         public string GetUpdateStoredProcedureSql(Type entityType)
         {
-            var template = GetProcedureTemplate("sp_update.txt");
+            var template = GetAssemblyResource("sp_update.txt");
 
             var model = GetProcedureGenerationModel(entityType);
 
@@ -275,7 +282,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
 
         public string GetSelectByIdStoredProcedureSql(Type entityType)
         {
-            var template = GetProcedureTemplate("sp_select_by_id.txt");
+            var template = GetAssemblyResource("sp_select_by_id.txt");
 
             var model = GetProcedureGenerationModel(entityType);
 
@@ -288,7 +295,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
 
         public string GetDeleteStoredProcedureSql(Type entityType)
         {
-            var template = GetProcedureTemplate("sp_delete.txt");
+            var template = GetAssemblyResource("sp_delete.txt");
 
             var model = GetProcedureGenerationModel(entityType);
 
@@ -299,7 +306,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
 
         private string GetUndoDeleteStoredProcedureSql(Type entityType)
         {
-            var template = GetProcedureTemplate("sp_undo_delete.txt");
+            var template = GetAssemblyResource("sp_undo_delete.txt");
 
             var model = GetProcedureGenerationModel(entityType);
 
@@ -310,7 +317,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
 
         private string GetHardDeleteStoredProcedureSql(Type entityType)
         {
-            var template = GetProcedureTemplate("sp_hard_delete.txt");
+            var template = GetAssemblyResource("sp_hard_delete.txt");
 
             var model = GetProcedureGenerationModel(entityType);
 
@@ -321,7 +328,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
 
         private string GetSelectRevisionsStoredProcedureSql(Type entityType)
         {
-            var template = GetProcedureTemplate("sp_select_revisions.txt");
+            var template = GetAssemblyResource("sp_select_revisions.txt");
 
             var model = GetProcedureGenerationModel(entityType);
 
@@ -334,7 +341,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
 
         private string GetSaveRevisionStoredProcedureSql(Type entityType)
         {
-            var template = GetProcedureTemplate("sp_save_revision.txt");
+            var template = GetAssemblyResource("sp_save_revision.txt");
 
             var model = GetProcedureGenerationModel(entityType);
 
@@ -347,7 +354,7 @@ namespace StandardRepository.PostgreSQL.DbGenerator
 
         private string GetRestoreRevisionStoredProcedureSql(Type entityType)
         {
-            var template = GetProcedureTemplate("sp_restore_revision.txt");
+            var template = GetAssemblyResource("sp_restore_revision.txt");
 
             var model = GetProcedureGenerationModel(entityType);
 
@@ -552,6 +559,9 @@ namespace StandardRepository.PostgreSQL.DbGenerator
             sb.Append($"    {tableName}_uid uuid not null,{Environment.NewLine}");
             sb.Append($"    {tableName}_name text not null,{Environment.NewLine}");
 
+            var reservedWordsString = GetAssemblyResource("reserved_words");
+            var reservedWords = reservedWordsString.Split(new[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries);
+            
             var fields = _entityUtils.GetAllProperties(entityType);
             for (var i = 0; i < fields.Length; i++)
             {
@@ -560,21 +570,20 @@ namespace StandardRepository.PostgreSQL.DbGenerator
                 {
                     continue;
                 }
-
+                
                 if (field.Name == "Id"
                     || field.Name == "Uid"
                     || field.Name == "Name")
                 {
                     continue;
                 }
-
-                if (field.Name == "row"
-                    || field.Name == "column")
+                
+                var fieldName = field.Name.GetDelimitedName();
+                if (reservedWords.Contains(fieldName.ToUpperInvariant()))
                 {
                     throw new ArgumentException(entityType.Name + " has not supported field name! (" + field.Name + ")");
                 }
 
-                var fieldName = field.Name.GetDelimitedName();
                 var notNullText = GetNotNullStringIfFieldNullable(field);
 
                 if (field.Name == "IP")

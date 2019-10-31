@@ -6,7 +6,7 @@ namespace StandardRepository.Helpers
 {
     public abstract class TypeLookup
     {
-        private static readonly IReadOnlyDictionary<Type, DbType> _type2DbType = new Dictionary<Type, DbType>()
+        private readonly IReadOnlyDictionary<Type, DbType> _type2DbType = new Dictionary<Type, DbType>
         {
             [typeof(byte)] = DbType.Byte,
             [typeof(sbyte)] = DbType.SByte,
@@ -21,6 +21,7 @@ namespace StandardRepository.Helpers
             [typeof(decimal)] = DbType.Decimal,
             [typeof(bool)] = DbType.Boolean,
             [typeof(string)] = DbType.String,
+            [typeof(object)] = DbType.String,
             [typeof(char)] = DbType.StringFixedLength,
             [typeof(Guid)] = DbType.Guid,
             [typeof(DateTime)] = DbType.DateTime2,
@@ -44,7 +45,10 @@ namespace StandardRepository.Helpers
             [typeof(DateTimeOffset?)] = DbType.DateTimeOffset
         };
 
-        public bool HasDbType(Type type) => _type2DbType.ContainsKey(type);
+        public bool HasDbType(Type type)
+        {
+            return _type2DbType.ContainsKey(type);
+        }
 
         public DbType GetDbType(Type type) => _type2DbType[type];
 

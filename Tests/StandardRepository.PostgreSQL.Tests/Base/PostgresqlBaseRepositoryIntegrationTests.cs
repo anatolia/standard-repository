@@ -67,7 +67,8 @@ namespace StandardRepository.PostgreSQL.Tests.Base
                 IsActive = true,
                 OrganizationUid = organization.Uid,
                 OrganizationId = organization.Id,
-                OrganizationName = organization.Name
+                OrganizationName = organization.Name,
+                OtherValue = "the other value"
             };
             return project;
         }

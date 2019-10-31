@@ -9,7 +9,7 @@ namespace StandardRepository.PostgreSQL.Helpers
 {
     public class PostgreSQLTypeLookup : TypeLookup
     {
-        private static readonly IReadOnlyDictionary<Type, string> _types = new Dictionary<Type, string>()
+        private static readonly IReadOnlyDictionary<Type, string> _types = new Dictionary<Type, string>
         {
             [typeof(int)] = NpgsqlDbType.Integer.ToString(),
             [typeof(int?)] = NpgsqlDbType.Integer.ToString(),
@@ -22,6 +22,7 @@ namespace StandardRepository.PostgreSQL.Helpers
             [typeof(char)] = NpgsqlDbType.Text.ToString(),
             [typeof(char?)] = NpgsqlDbType.Text.ToString(),
             [typeof(string)] = NpgsqlDbType.Text.ToString(),
+            [typeof(object)] = NpgsqlDbType.Text.ToString(),
             [typeof(Guid)] = NpgsqlDbType.Uuid.ToString(),
             [typeof(Guid?)] = NpgsqlDbType.Uuid.ToString(),
             [typeof(DateTime)] = NpgsqlDbType.Timestamp.ToString(),

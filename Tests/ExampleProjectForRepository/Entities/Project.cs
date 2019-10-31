@@ -14,8 +14,10 @@ namespace ExampleProjectForRepository.Entities
         public string Description { get; set; }
         public string Url { get; set; }
         public bool IsActive { get; set; }
-        public decimal Cost { get; set; }
+        public decimal ProjectCost { get; set; }
         
         public Guid? OwnerUid { get; set; }
+
+        public object ProjectValue { get; set; }
     }
 }

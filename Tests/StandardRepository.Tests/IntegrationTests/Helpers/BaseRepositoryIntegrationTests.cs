@@ -29,7 +29,7 @@ namespace StandardRepository.Tests.IntegrationTests.Helpers
             var connectionSettings = new ConnectionSettings();
             connectionSettings.DbHost = "localhost";
             connectionSettings.DbUser = "local_user";
-            connectionSettings.DbPassword = "local_user+2019*";
+            connectionSettings.DbPassword = "local_user+-2019*";
             connectionSettings.DbPort = "5432";
 
             if (dbName == null)
