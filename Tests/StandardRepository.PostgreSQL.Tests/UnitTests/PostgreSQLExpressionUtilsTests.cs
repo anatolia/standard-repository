@@ -155,7 +155,7 @@ namespace StandardRepository.PostgreSQL.Tests.UnitTests
         [Test]
         public void ExpressionUtils_GetConditions_Object()
         {
-            var test = "test";
+            object test = "test";
             Expression<Func<Project, bool>> expression = x => x.OtherValue == test;
             Thread.Sleep(123);
 
