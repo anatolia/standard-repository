@@ -155,17 +155,18 @@ namespace StandardRepository.PostgreSQL.Tests.UnitTests
         [Test]
         public void ExpressionUtils_GetConditions_Object()
         {
-            Expression<Func<Project, bool>> expression = x => x.OtherValue == "test";
+            var test = "test";
+            Expression<Func<Project, bool>> expression = x => x.OtherValue == test;
             Thread.Sleep(123);
 
             var parameters = new Dictionary<string, DbParameterInfo>();
             var filter = SystemUnderTest.GetConditions(expression.Body, parameters);
 
-            Assert.AreEqual("other_value = :varprm_other_value", filter);
+            Assert.AreEqual("other_value = :varprm_test", filter);
             parameters.Count.ShouldBe(1);
             var prmValue = parameters.Values.First();
             prmValue.Value.ShouldBeOfType<string>();
-            prmValue.Value.ShouldBe("test");
+            prmValue.Value.ShouldBe(test);
         }
         
         [Test]
