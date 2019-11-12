@@ -61,6 +61,8 @@ namespace StandardRepository.Tests.UnitTests.Helpers
             var result = SystemUnderTest.GetAllProperties(organization.GetType());           
             
             Assert.AreEqual(result.Length, 18);
+            Assert.AreEqual(SystemUnderTest.PropertiesExceptBaseCache.Count, 0);
+            Assert.AreEqual(SystemUnderTest.AllPropertiesCache.Count, 1);
             
             Assert.AreEqual(result[0].Name, nameof(Organization.Email));
             Assert.AreEqual(result[1].Name, nameof(Organization.Description));
@@ -83,12 +85,14 @@ namespace StandardRepository.Tests.UnitTests.Helpers
         }
         
         [Test]
-        public void Verify_Get_Properties()
+        public void Verify_Get_GetPropertiesExceptBase()
         {
             var organization = new Organization();
             var result = SystemUnderTest.GetPropertiesExceptBase(organization.GetType());           
             
             Assert.AreEqual(result.Length, 8);
+            Assert.AreEqual(SystemUnderTest.PropertiesExceptBaseCache.Count, 1);
+            Assert.AreEqual(SystemUnderTest.AllPropertiesCache.Count, 0);
             
             Assert.AreEqual(result[0].Name, nameof(Organization.Email));
             Assert.AreEqual(result[1].Name, nameof(Organization.Description));

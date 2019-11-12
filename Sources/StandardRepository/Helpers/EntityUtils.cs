@@ -14,6 +14,7 @@ namespace StandardRepository.Helpers
 
         public Dictionary<string, string> FieldNameCache { get; }
         public Dictionary<Type, PropertyInfo[]> AllPropertiesCache { get; }
+        public Dictionary<Type, PropertyInfo[]> PropertiesExceptBaseCache { get; }
         public PropertyInfo[] BaseProperties { get; }
         public Assembly[] AssembliesForEntities { get; }
 
@@ -26,6 +27,7 @@ namespace StandardRepository.Helpers
             AssembliesForEntities = assemblyOfEntities;
             FieldNameCache = new Dictionary<string, string>();
             AllPropertiesCache = new Dictionary<Type, PropertyInfo[]>();
+            PropertiesExceptBaseCache = new Dictionary<Type, PropertyInfo[]>();
             BaseProperties = GetBaseProperties();
 
             EntityTypes = GetEntityTypes();
@@ -100,9 +102,9 @@ namespace StandardRepository.Helpers
         /// <returns></returns>
         public PropertyInfo[] GetPropertiesExceptBase(Type entityType)
         {
-            if (AllPropertiesCache.ContainsKey(entityType))
+            if (PropertiesExceptBaseCache.ContainsKey(entityType))
             {
-                return AllPropertiesCache[entityType];
+                return PropertiesExceptBaseCache[entityType];
             }
 
             var fields = entityType.GetProperties();
@@ -129,7 +131,9 @@ namespace StandardRepository.Helpers
                 properFields.Add(propertyInfo);
             }
             
-            return properFields.ToArray();
+            var propertyInfos = properFields.ToArray();
+            PropertiesExceptBaseCache.Add(entityType, propertyInfos);
+            return propertyInfos;
         }
 
         private PropertyInfo[] GetBaseProperties()
