@@ -1,6 +1,6 @@
 ﻿using System.Configuration;
 using System.Reflection;
-
+using ExampleProjectForRepository.Entities;
 using StandardRepository.Helpers;
 using StandardRepository.Models;
 using StandardRepository.PostgreSQL.DbGenerator;
@@ -22,7 +22,8 @@ namespace ExampleProjectForRepository
             connectionSettings.DbPort = ConfigurationManager.AppSettings["DbPort"];
 
             var typeLookup = new PostgreSQLTypeLookup();
-            var entityUtils = new EntityUtils(typeLookup, Assembly.GetExecutingAssembly());
+            var entityAssemblies = new[] { typeof(Organization).Assembly };
+            var entityUtils = new EntityUtils(typeLookup, entityAssemblies);
 
             var masterConnectionString = PostgreSQLConnectionFactory.GetConnectionString(connectionSettings.DbHost, connectionSettings.DbNameMaster, connectionSettings.DbUser, connectionSettings.DbPassword, connectionSettings.DbPort);
             var masterConnectionFactory = new PostgreSQLConnectionFactory(masterConnectionString);
