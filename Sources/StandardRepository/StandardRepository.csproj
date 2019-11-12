@@ -8,8 +8,8 @@
     <PackageLicenseExpression></PackageLicenseExpression>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <Description>a data access layer which comes with record revision history and soft delete logic.</Description>
-    <Version>1.0.3.0</Version>
-    <PackageVersion>1.0.3.0</PackageVersion>
+    <Version>1.0.4.0</Version>
+    <PackageVersion>1.0.4.0</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
