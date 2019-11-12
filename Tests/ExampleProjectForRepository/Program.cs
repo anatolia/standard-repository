@@ -27,7 +27,6 @@ namespace ExampleProjectForRepository
             var projectRepository = new ProjectRepository(typeLookup, new PostgreSQLConstants<Project>(entityUtils),
                                                           entityUtils, new PostgreSQLExpressionUtils(), sqlExecutor, new List<string>());
 
-
             #region initial example
             var organization = new Organization
             {

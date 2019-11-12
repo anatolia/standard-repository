@@ -86,7 +86,7 @@ namespace StandardRepository.Tests.UnitTests.Helpers
         public void Verify_Get_Properties()
         {
             var organization = new Organization();
-            var result = SystemUnderTest.GetProperties(organization.GetType());           
+            var result = SystemUnderTest.GetPropertiesExceptBase(organization.GetType());           
             
             Assert.AreEqual(result.Length, 8);
             

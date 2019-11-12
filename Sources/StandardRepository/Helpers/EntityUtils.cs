@@ -98,7 +98,7 @@ namespace StandardRepository.Helpers
         /// </summary>
         /// <param name="entityType"></param>
         /// <returns></returns>
-        public PropertyInfo[] GetProperties(Type entityType)
+        public PropertyInfo[] GetPropertiesExceptBase(Type entityType)
         {
             if (AllPropertiesCache.ContainsKey(entityType))
             {

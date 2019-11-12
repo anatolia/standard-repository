@@ -53,7 +53,7 @@ namespace StandardRepository
             UpdateableFields = updateableFields;
 
             var entityType = typeof(T);
-            Fields = _entityUtils.GetProperties(entityType);
+            Fields = _entityUtils.GetPropertiesExceptBase(entityType);
 
             FieldNameCache = new Dictionary<Expression, string>();
             ParameterNameCache = new Dictionary<string, ParameterNameCacheInfo>();
