@@ -33,9 +33,8 @@ namespace StandardRepository.PostgreSQL.DbGenerator
         /// <returns></returns>
         public override List<string> GenerateSchemas()
         {
-            // extension for uid generation
-            _sqlExecutor.ExecuteSql($"CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";").Wait();
-            
+            InstallExtensions();
+
             var schemas = _entityUtils.EntityTypes.Select(x => _entityUtils.GetSchemaName(x)).Distinct().ToList();
             for (var i = 0; i < schemas.Count; i++)
             {
@@ -44,6 +43,29 @@ namespace StandardRepository.PostgreSQL.DbGenerator
             }
 
             return schemas;
+        }
+
+        private void InstallExtensions()
+        {
+            // extension for similarity
+            try
+            {
+                _sqlExecutor.ExecuteSql("CREATE EXTENSION pg_trgm;").Wait();
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+
+            // extension for uid generation
+            try
+            {
+                _sqlExecutor.ExecuteSql("CREATE EXTENSION \"uuid-ossp\";").Wait();
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
         }
 
         public override List<string> GenerateTables()

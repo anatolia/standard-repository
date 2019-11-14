@@ -31,9 +31,9 @@ namespace StandardRepository.PostgreSQL.Tests.Base
             DropDb(dbName);
         }
 
-        public string POSTGRES_DB_NAME => "postgres";
+        private string POSTGRES_DB_NAME => "postgres";
 
-        public Organization GetOrganization()
+        protected Organization GetOrganization()
         {
             var organization = new Organization
             {
@@ -46,7 +46,7 @@ namespace StandardRepository.PostgreSQL.Tests.Base
             return organization;
         }
 
-        public Organization GetOrganization(Organization entity)
+        protected Organization GetOrganization(Organization entity)
         {
             var organization = new Organization
             {
@@ -59,7 +59,7 @@ namespace StandardRepository.PostgreSQL.Tests.Base
             return organization;
         }
 
-        public Project GetProject(Organization organization)
+        protected Project GetProject(Organization organization)
         {
             var project = new Project
             {
@@ -73,7 +73,7 @@ namespace StandardRepository.PostgreSQL.Tests.Base
             return project;
         }
 
-        public OrganizationRepository GetOrganizationRepository()
+        protected OrganizationRepository GetOrganizationRepository()
         {
             var postgreSQLTypeLookup = GetTypeLookup();
             var entityUtils = GetEntityUtils(postgreSQLTypeLookup, GetAssemblyOfEntities());
@@ -89,7 +89,7 @@ namespace StandardRepository.PostgreSQL.Tests.Base
             return typeof(Organization).Assembly;
         }
 
-        public ProjectRepository GetProjectRepository()
+        protected ProjectRepository GetProjectRepository()
         {
             var postgreSQLTypeLookup = GetTypeLookup();
             var entityUtils = GetEntityUtils(postgreSQLTypeLookup, GetAssemblyOfEntities());
@@ -100,12 +100,12 @@ namespace StandardRepository.PostgreSQL.Tests.Base
             return repository;
         }
 
-        public PostgreSQLTypeLookup GetTypeLookup()
+        private PostgreSQLTypeLookup GetTypeLookup()
         {
             return new PostgreSQLTypeLookup();
         }
 
-        public void EnsureDbGenerated(string dbName)
+        private void EnsureDbGenerated(string dbName)
         {
             var masterExecutor = GetSQLExecutor(POSTGRES_DB_NAME);
             var isDbExist = masterExecutor.ExecuteSqlReturningValue<bool>($"SELECT true FROM pg_database WHERE datname = '{dbName}';").Result;
@@ -121,12 +121,12 @@ namespace StandardRepository.PostgreSQL.Tests.Base
                 var typeLookup = new PostgreSQLTypeLookup();
                 var entityUtils = new EntityUtils(typeLookup, GetAssemblyOfEntities());
                 var executor = GetSQLExecutor(dbName);
-                var dbGenerator = new PostgreSQLDbGenerator(typeLookup, entityUtils, (PostgreSQLExecutor)masterExecutor, (PostgreSQLExecutor)executor);
+                var dbGenerator = new PostgreSQLDbGenerator(typeLookup, entityUtils, masterExecutor, executor);
                 dbGenerator.Generate().Wait();
             }
         }
 
-        public void DropDb(string dbName)
+        private void DropDb(string dbName)
         {
             Sleep();
 
@@ -140,7 +140,7 @@ namespace StandardRepository.PostgreSQL.Tests.Base
                                 DROP DATABASE {dbName};").Wait();
         }
 
-        public PostgreSQLExecutor GetSQLExecutor(string dbName)
+        private PostgreSQLExecutor GetSQLExecutor(string dbName)
         {
             var typeLookup = new PostgreSQLTypeLookup();
             var entityUtils = new EntityUtils(typeLookup, GetAssemblyOfEntities());
