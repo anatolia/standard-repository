@@ -1,17 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <Company>anatolia.solutions</Company>
     <PackageProjectUrl>https://github.com/anatolia/standard-repository</PackageProjectUrl>
     <RepositoryUrl>https://github.com/anatolia/standard-repository</RepositoryUrl>
     <PackageLicenseExpression></PackageLicenseExpression>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <Description>a data access layer which comes with record revision history and soft delete logic.</Description>
-    <Version>1.0.4.2</Version>
-    <PackageVersion>1.0.4.2</PackageVersion>
-    <AssemblyVersion>1.0.4.2</AssemblyVersion>
-    <FileVersion>1.0.4.2</FileVersion>
+    <Version>1.0.4.3</Version>
+    <PackageVersion>1.0.4.3</PackageVersion>
+    <AssemblyVersion>1.0.4.3</AssemblyVersion>
+    <FileVersion>1.0.4.3</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
